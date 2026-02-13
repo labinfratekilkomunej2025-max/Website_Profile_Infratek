@@ -1,12 +1,22 @@
-"use client";
+import Navbar from "@/Components/Navbar";
+import Footer from "@/Components/Footer";
+import { NavbarProps } from '@/types';
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-
-export default function Contact() {
+export default function Contact(
+{
+  CurrentPath,
+  HomePath,
+  GalleryPath,
+  ContactPath,
+}: NavbarProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-white">
-      <Navbar />
+      <Navbar 
+        CurrentPath={CurrentPath}
+        HomePath={HomePath}
+        GalleryPath={GalleryPath}
+        ContactPath={ContactPath}
+      />
 
       {/* Contact Section */}
       <section className="relative pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 overflow-hidden">

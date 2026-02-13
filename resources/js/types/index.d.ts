@@ -12,3 +12,9 @@ export type PageProps<
         user: User;
     };
 };
+type NavbarProps = {
+  CurrentPath: string
+  HomePath: string
+  GalleryPath: string
+  ContactPath: string
+}

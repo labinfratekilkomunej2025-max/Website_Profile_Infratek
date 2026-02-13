@@ -4,6 +4,16 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
+
+function getPaths(string $currentPath){
+    return [
+        'CurrentPath'=>$currentPath,
+        'HomePath'=>route('home'),
+        'GalleryPath'=>route('gallery'),
+        'ContactPath'=>route('contact'),
+    ];
+}
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -14,9 +24,15 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/test', function(){
-    return Inertia::render('Home');
-});
+Route::get('/home', function(Request $request){
+    return Inertia::render('Home', getPaths($request->url()));
+})->name('home');
+Route::get('/gallery', function(Request $request){
+    return Inertia::render('gallery/page', getPaths($request->url()));
+})->name('gallery');
+Route::get('/contact', function(Request $request){
+    return Inertia::render('contact/page', getPaths($request->url()));
+})->name('contact');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

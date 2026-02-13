@@ -2,8 +2,15 @@
 import { useState } from "react";
 import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
+import { NavbarProps } from '@/types';
 
-export default function Gallery() {
+export default function Gallery(
+{
+  CurrentPath,
+  HomePath,
+  GalleryPath,
+  ContactPath,
+}: NavbarProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
@@ -20,7 +27,12 @@ export default function Gallery() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-white">
-      <Navbar />
+      <Navbar 
+        CurrentPath={CurrentPath}
+        HomePath={HomePath}
+        GalleryPath={GalleryPath}
+        ContactPath={ContactPath}
+      />
 
       {/* Gallery Section */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
@@ -62,13 +74,21 @@ export default function Gallery() {
                   {/* Image Container - 16:9 Aspect Ratio */}
                   <div className="relative w-full aspect-video bg-gradient-to-br from-blue-400 to-blue-600 overflow-hidden">
                     {/* Gallery Image */}
-                    <Image
+                    <div className="relative w-full h-full">
+                      <img
+                          src="http://127.0.0.1:8000/storage/yanuar.png"
+                          alt={`Yanuar Nurdiansyah`}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 320px, 384px"
+                      />
+                    </div>
+                    {/* <Image
                       src={`/assets/images/gallery/${imageNumber}.jpg`}
                       alt={`Gallery Image ${imageNumber}`}
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
+                    /> */}
 
                     {/* Decorative Neon Frame */}
                     <div className="absolute inset-0 border-4 border-white/30 group-hover:border-white/50 transition-all duration-300"></div>

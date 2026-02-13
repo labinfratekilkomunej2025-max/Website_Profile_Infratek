@@ -1,11 +1,23 @@
 
 import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
+import { NavbarProps } from '@/types';
 
-export default function Home() {
+export default function Home({
+  CurrentPath,
+  HomePath,
+  GalleryPath,
+  ContactPath,
+}: NavbarProps
+) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-white">
-      <Navbar />
+      <Navbar 
+        CurrentPath={CurrentPath}
+        HomePath={HomePath}
+        GalleryPath={GalleryPath}
+        ContactPath={ContactPath}
+      />
 
       {/* Hero Section */}
       <section
@@ -435,6 +447,12 @@ export default function Home() {
       </section>
 
       <Footer />
+      <div>
+        {CurrentPath}
+        {HomePath}
+        {GalleryPath}
+        {ContactPath}
+      </div>
     </div>
   );
 }
