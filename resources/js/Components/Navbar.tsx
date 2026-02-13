@@ -2,6 +2,7 @@
 // import Image from "next/image";
 import { useState, useEffect } from "react";
 import { NavbarProps } from '@/types';
+import { Link } from '@inertiajs/react';
 // import { usePathname } from "next/navigation";
 
 // export default function Navbar() {}
@@ -40,7 +41,7 @@ export default function Navbar({
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
               <div className="relative rounded-lg shadow-xl overflow-hidden w-10 h-10 sm:w-12 sm:h-12">
                 <img
-                  src="/assets/images/logo/infratek.jpg"
+                  src="http://127.0.0.1:8000/infratek.jpg"
                   alt="Logo INFRATEK"
                   width={48}
                   height={48}
@@ -60,7 +61,7 @@ export default function Navbar({
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
-            <a
+            <Link
               href={HomePath}
               className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
                 CurrentPath === HomePath
@@ -78,9 +79,9 @@ export default function Navbar({
               {CurrentPath !== HomePath && (
                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
               )}
-            </a>
+            </Link>
 
-            <a
+            <Link
               href={GalleryPath}
               className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
                 CurrentPath === GalleryPath
@@ -98,9 +99,9 @@ export default function Navbar({
               {CurrentPath !== GalleryPath && (
                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
               )}
-            </a>
+            </Link>
 
-            <a
+            <Link
               href={ContactPath}
               className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
                 CurrentPath ===  ContactPath
@@ -118,7 +119,7 @@ export default function Navbar({
               {CurrentPath !==  ContactPath && (
                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
               )}
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -155,7 +156,7 @@ export default function Navbar({
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4 space-y-2 animate-fade-in">
-            <a
+            <Link
               href={HomePath}
               onClick={() => setIsMobileMenuOpen(false)}
               className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
@@ -165,8 +166,8 @@ export default function Navbar({
               }`}
             >
               Home
-            </a>
-            <a
+            </Link>
+            <Link
               href={GalleryPath}
               onClick={() => setIsMobileMenuOpen(false)}
               className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
@@ -176,8 +177,8 @@ export default function Navbar({
               }`}
             >
               Gallery
-            </a>
-            <a
+            </Link>
+            <Link
               href = {ContactPath}
               onClick={() => setIsMobileMenuOpen(false)}
               className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
@@ -187,7 +188,7 @@ export default function Navbar({
               }`}
             >
               Contact
-            </a>
+            </Link>
           </div>
         )}
       </div>

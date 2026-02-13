@@ -15,13 +15,13 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="rounded-lg shadow-xl shadow-blue-500/30 overflow-hidden w-10 h-10">
-                {/* <Image
-                  src="/assets/images/logo/infratek.jpg"
+                <img
+                  src="http://127.0.0.1:8000/infratek.jpg"
                   alt="Logo INFRATEK"
                   width={40}
                   height={40}
                   className="object-cover w-full h-full"
-                /> */}
+                />
               </div>
               <h3 className="text-xl font-bold">LAB INFRATEK</h3>
             </div>

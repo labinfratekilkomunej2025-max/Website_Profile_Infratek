@@ -3,29 +3,31 @@ import { useState } from "react";
 import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
 import { NavbarProps } from '@/types';
-
+import { Head } from '@inertiajs/react';
 export default function Gallery(
-{
-  CurrentPath,
-  HomePath,
-  GalleryPath,
-  ContactPath,
-}: NavbarProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-
-  const itemsPerPage = 9;
-  const totalItems = 13; // Total gambar yang tersedia
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const currentItems = Array.from(
-    { length: endIndex - startIndex },
-    (_, i) => startIndex + i + 1
-  );
-
-  return (
+  {
+    CurrentPath,
+    HomePath,
+    GalleryPath,
+    ContactPath,
+  }: NavbarProps) {
+    const [currentPage, setCurrentPage] = useState(1);
+    const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+    
+    const itemsPerPage = 9;
+    const totalItems = 13; // Total gambar yang tersedia
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+    const currentItems = Array.from(
+      { length: endIndex - startIndex },
+      (_, i) => startIndex + i + 1
+    );
+    
+    return (
+    <>  
+    <Head title="Gallery" />
     <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-white">
       <Navbar 
         CurrentPath={CurrentPath}
@@ -76,7 +78,7 @@ export default function Gallery(
                     {/* Gallery Image */}
                     <div className="relative w-full h-full">
                       <img
-                          src="http://127.0.0.1:8000/storage/yanuar.png"
+                          src={`http://127.0.0.1:8000/storage/gallery/${imageNumber}.jpg`}
                           alt={`Yanuar Nurdiansyah`}
                           className="absolute inset-0 w-full h-full object-cover"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 320px, 384px"
@@ -210,5 +212,6 @@ export default function Gallery(
 
       <Footer />
     </div>
+    </>
   );
 }

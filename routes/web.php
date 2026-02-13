@@ -15,16 +15,16 @@ function getPaths(string $currentPath){
     ];
 }
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+// Route::get('/', function () {
+//     return Inertia::render('Welcome', [
+//         'canLogin' => Route::has('login'),
+//         'canRegister' => Route::has('register'),
+//         'laravelVersion' => Application::VERSION,
+//         'phpVersion' => PHP_VERSION,
+//     ]);
+// });
 
-Route::get('/home', function(Request $request){
+Route::get('/', function(Request $request){
     return Inertia::render('Home', getPaths($request->url()));
 })->name('home');
 Route::get('/gallery', function(Request $request){
