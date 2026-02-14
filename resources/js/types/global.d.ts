@@ -3,9 +3,16 @@ import { AxiosInstance } from 'axios';
 import { route as ziggyRoute } from 'ziggy-js';
 import { PageProps as AppPageProps } from './';
 
+
+
 declare global {
+    interface AppConfig {
+        baseUrl: string;
+        storageUrl: string;
+    }
     interface Window {
         axios: AxiosInstance;
+        appConfig: AppConfig;
     }
 
     /* eslint-disable no-var */

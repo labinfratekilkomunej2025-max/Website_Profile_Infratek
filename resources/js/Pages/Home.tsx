@@ -4,22 +4,24 @@ import Footer from "@/Components/Footer";
 import { NavbarProps } from '@/types';
 import { Head } from '@inertiajs/react';
 
+
 export default function Home({
   CurrentPath,
-  HomePath,
-  GalleryPath,
-  ContactPath,
+  // HomePath,
+  // GalleryPath,
+  // ContactPath,
 }: NavbarProps
 ) {
+  const storageUrl: string = window.appConfig.storageUrl;
   return (
     <>
     <Head title="Home" />
     <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-white">
       <Navbar 
         CurrentPath={CurrentPath}
-        HomePath={HomePath}
-        GalleryPath={GalleryPath}
-        ContactPath={ContactPath}
+        // HomePath={HomePath}
+        // GalleryPath={GalleryPath}
+        // ContactPath={ContactPath}
       />
 
       {/* Hero Section */}
@@ -116,7 +118,7 @@ export default function Home({
                 <div className="relative w-full aspect-square bg-gradient-to-br from-blue-400 to-blue-600 overflow-hidden">
                   <div className="relative w-full h-full">
                     <img
-                        src="http://127.0.0.1:8000/storage/struktur_organisasi/yanuar.png"
+                        src={`${storageUrl}/struktur_organisasi/yanuar.png`}
                         alt={`Yanuar Nurdiansyah`}
                         className="absolute inset-0 w-full h-full object-cover"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 320px, 384px"
@@ -154,7 +156,7 @@ export default function Home({
                 <div className="relative w-full aspect-square bg-gradient-to-br from-blue-500 to-blue-700 overflow-hidden">
                    <div className="relative w-full h-full">
                     <img
-                        src="http://127.0.0.1:8000/storage/struktur_organisasi/widy.png"
+                        src={`${storageUrl}/struktur_organisasi/widy.png`}
                         alt={`Widya Dwinoto Darmawan`}
                         className="absolute inset-0 w-full h-full object-cover"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 320px, 384px"

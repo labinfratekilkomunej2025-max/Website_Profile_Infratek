@@ -14,7 +14,7 @@ export type PageProps<
 };
 type NavbarProps = {
   CurrentPath: string
-  HomePath: string
-  GalleryPath: string
-  ContactPath: string
+//   HomePath: string
+//   GalleryPath: string
+//   ContactPath: string
 }

@@ -6,13 +6,17 @@ import { Link } from '@inertiajs/react';
 // import { usePathname } from "next/navigation";
 
 // export default function Navbar() {}
-export default function Navbar({
+export default function Navbar(
+{
   CurrentPath,
-  HomePath,
-  GalleryPath,
-  ContactPath,
+  // HomePath,
+  // GalleryPath,
+  // ContactPath,
 }: NavbarProps
 ) {
+  const HomePath=route('home');
+  const GalleryPath=route('gallery');
+  const ContactPath=route('contact');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 

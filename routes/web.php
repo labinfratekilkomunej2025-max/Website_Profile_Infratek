@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 function getPaths(string $currentPath){
     return [
         'CurrentPath'=>$currentPath,
-        'HomePath'=>route('home'),
-        'GalleryPath'=>route('gallery'),
-        'ContactPath'=>route('contact'),
+        // 'HomePath'=>route('home'),
+        // 'GalleryPath'=>route('gallery'),
+        // 'ContactPath'=>route('contact'),
     ];
 }
 

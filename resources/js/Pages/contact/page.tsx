@@ -6,9 +6,9 @@ import { Head } from '@inertiajs/react';
 export default function Contact(
   {
     CurrentPath,
-    HomePath,
-    GalleryPath,
-    ContactPath,
+    // HomePath,
+    // GalleryPath,
+    // ContactPath,
   }: NavbarProps) {
     return (
       <>
@@ -16,9 +16,9 @@ export default function Contact(
       <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-white">
       <Navbar 
         CurrentPath={CurrentPath}
-        HomePath={HomePath}
-        GalleryPath={GalleryPath}
-        ContactPath={ContactPath}
+        // HomePath={HomePath}
+        // GalleryPath={GalleryPath}
+        // ContactPath={ContactPath}
         />
 
       {/* Contact Section */}
