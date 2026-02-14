@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('news', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->foreignId('created_by')->constrained('accounts');
+            $table->foreignId('created_by_id')->constrained('users');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('edited_at')->useCurrent()->useCurrentOnUpdate();
         });

@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('gallery_images', function (Blueprint $table) {
             $table->id();
             $table->foreignId('gallery_id')->constrained('galleries');
-            $table->foreignId('uploaded_by_id')->constrained('accounts');
+            $table->foreignId('uploaded_by_id')->constrained('users');
             $table->string('image_path');
         });
     }
