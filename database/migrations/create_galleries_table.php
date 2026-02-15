@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->boolean('is_public')->default(false);
-            $table->foreignId('edited_by_id')->constrained('users');
+            $table->foreignId('edited_by_id')->constrained('users')->onDelete('cascade');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('edited_at')->useCurrent()->useCurrentOnUpdate();
         });

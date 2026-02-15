@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('members', function (Blueprint $table) {
             $table->id();
             $table->string('full_name');
-            $table->foreignId('position_id')->constrained('positions');
+            $table->foreignId('position_id')->constrained('positions')->onDelete('cascade');
             $table->string('photo_path');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('edited_at')->useCurrent()->useCurrentOnUpdate();

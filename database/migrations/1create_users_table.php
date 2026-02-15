@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('password'); // akan di-hash oleh Laravel
             $table->boolean('is_admin')->default(false);
+            $table->boolean('is_active')->default(true);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('edited_at')->useCurrent()->useCurrentOnUpdate();
             $table->rememberToken();
