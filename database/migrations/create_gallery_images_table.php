@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('gallery_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gallery_id')->constrained('galleries');
-            $table->foreignId('uploaded_by_id')->constrained('users');
+            $table->foreignId('gallery_id')->constrained('galleries')->onDelete('cascade');
+            $table->foreignId('uploaded_by_id')->constrained('users')->onDelete('cascade');
             $table->string('image_path');
         });
     }

@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('management_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('member_id')->constrained('members');
+            $table->foreignId('member_id')->constrained('members')->onDelete('cascade')->unique();
             $table->string('linkedin_link')->nullable();
-            $table->foreignId('period_id')->constrained('periods');
+            $table->foreignId('period_id')->constrained('periods')->onDelete('cascade');
         });
     }
 

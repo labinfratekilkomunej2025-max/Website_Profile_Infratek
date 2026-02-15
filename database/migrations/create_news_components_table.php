@@ -10,13 +10,13 @@ return new class extends Migration
     {
         Schema::create('news_components', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('news_id')->constrained('news');
+            $table->foreignId('news_id')->constrained('news')->onDelete('cascade');
             $table->enum('type', ['text', 'image']);
             $table->text('text_content')->nullable();   // diisi jika type = 'text'
             $table->string('image_path')->nullable();   // diisi jika type = 'image'
             $table->string('alt_text');                 // wajib diisi
             $table->integer('order');
-            $table->foreignId('created_by_id')->constrained('users');
+            $table->foreignId('created_by_id')->constrained('users')->onDelete('cascade');
         });
     }
 
