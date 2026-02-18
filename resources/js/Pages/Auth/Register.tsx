@@ -2,6 +2,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
+import Checkbox from '@/Components/Checkbox';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -9,8 +10,8 @@ import { FormEventHandler } from 'react';
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
-        email: '',
         password: '',
+        is_active: "1",
         password_confirmation: '',
     });
 
@@ -45,23 +46,6 @@ export default function Register() {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
                     <InputLabel htmlFor="password" value="Password" />
 
                     <TextInput
@@ -77,7 +61,19 @@ export default function Register() {
 
                     <InputError message={errors.password} className="mt-2" />
                 </div>
-
+                <div>
+                    <InputLabel htmlFor="is_active" value="Is Active" />
+                    <Checkbox
+                        id="is_active"
+                        name="is_active"
+                        // @ts-ignore
+                        checked={data.is_active}
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                            // @ts-ignore
+                            setData('is_active', event.target.checked);
+                        }}
+                    />
+                </div>
                 <div className="mt-4">
                     <InputLabel
                         htmlFor="password_confirmation"

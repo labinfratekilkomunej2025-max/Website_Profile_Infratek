@@ -15,6 +15,7 @@ class Member extends Model
         'created_at',
         'edited_at',
     ];
+    public $timestamps = false;
     protected $casts = [
         'created_at' => 'datetime',
         'edited_at' => 'datetime',

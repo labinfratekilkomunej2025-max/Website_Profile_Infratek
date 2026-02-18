@@ -10,6 +10,7 @@ class Period extends Model
     protected $fillable = [
         'title',
     ];
+    public $timestamps = false;
     public function management_details():HasMany{
         return $this->hasMany(ManagementDetail::class);
     }

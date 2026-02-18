@@ -12,6 +12,7 @@ class ManagementDetail extends Model
         'linkedin_link',
         'period_id',
     ];
+    public $timestamps = false;
     public function member():BelongsTo
     {
         return $this->belongsTo(Member::class);

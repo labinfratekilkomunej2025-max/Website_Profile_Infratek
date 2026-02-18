@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -19,8 +20,11 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
+        'is_admin',
         'password',
+        'is_active',
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -44,5 +48,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function news():HasMany{
+        return $this->hasMany(News::class);
+    }
+    public function news_components():HasMany{
+        return $this->hasMany(NewsComponent::class);
+    }
+    public function galleries():HasMany{
+        return $this->hasMany(Gallery::class);
+    }
+    public function gallery_images():HasMany{
+        return $this->hasMany(GalleryImage::class);
     }
 }

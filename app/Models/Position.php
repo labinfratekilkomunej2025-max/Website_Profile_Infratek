@@ -10,6 +10,7 @@ class Position extends Model
     protected $fillable = [
         'name',
     ];
+    public $timestamps = false;
     public function members():HasMany{
         return $this->hasMany(Member::class);
     }

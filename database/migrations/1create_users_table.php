@@ -15,7 +15,7 @@ return new class extends Migration
             $table->boolean('is_admin')->default(false);
             $table->boolean('is_active')->default(true);
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('edited_at')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->rememberToken();
         });
         Schema::create('password_reset_tokens', function (Blueprint $table) {

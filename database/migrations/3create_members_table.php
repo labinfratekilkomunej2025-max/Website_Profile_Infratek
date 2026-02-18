@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('full_name');
             $table->foreignId('position_id')->constrained('positions')->onDelete('cascade');
-            $table->string('photo_path');
+            $table->string('photo_path')->default('');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('edited_at')->useCurrent()->useCurrentOnUpdate();
         });

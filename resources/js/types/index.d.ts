@@ -1,8 +1,13 @@
 export interface User {
     id: number;
     name: string;
-    email: string;
-    email_verified_at?: string;
+    is_active: boolean;
+    created_at: Date;
+    updated_at: Date;
+}
+export interface FlashProps {
+    success?: string;
+    error?: string;
 }
 
 export type PageProps<
@@ -11,6 +16,7 @@ export type PageProps<
     auth: {
         user: User;
     };
+    flash: FlashProps;
 };
 type NavbarProps = {
   CurrentPath: string
