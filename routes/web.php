@@ -21,18 +21,21 @@ function getPaths(string $currentPath){
     ];
 }
 
-// For routes that can be accessed for anyone
-Route::middleware('guest')->group(function () {
-    Route::get('/', function(Request $request){
-        return Inertia::render('Home', getPaths($request->url()));
-    })->name('home');
-    Route::get('/gallery', function(Request $request){
-        return Inertia::render('gallery/page', getPaths($request->url()));
-    })->name('gallery');
-    Route::get('/contact', function(Request $request){
-        return Inertia::render('contact/page', getPaths($request->url()));
-    })->name('contact');
-});
+Route::get('/', function () {
+    // Ini akan mencari file di: resources/js/Pages/Home.tsx
+    return Inertia::render('Home'); 
+})->name('home');
+
+Route::get('/gallery', function () {
+    // Ini akan mencari file di: resources/js/Pages/gallery/page.tsx
+    // Perhatikan huruf kecil 'g' dan 'p' harus sama persis dengan nama folder/file
+    return Inertia::render('gallery/page'); 
+})->name('gallery');
+
+Route::get('/contact', function () {
+    // Ini akan mencari file di: resources/js/Pages/contact/page.tsx
+    return Inertia::render('contact/page'); 
+})->name('contact');
 
 // For routes that can only be accessed by Editor or Admin
 Route::middleware('loginAuth')->group(function(){
@@ -43,6 +46,19 @@ Route::middleware('adminAuth')->group(function(){
     Route::get('auth/test-admin', function(Request $request){
     }); 
 });
+
+Route::get('/news', function () {
+    return Inertia::render('News');
+})->name('news');
+
+Route::get('/news/{slug}', function ($slug) {
+    // Kita kirim $slug ke komponen React agar bisa dipakai (nanti buat fetch data)
+    return Inertia::render('NewsDetail', ['slug' => $slug]);
+})->name('news.detail');
+
+Route::get('/about', function () {
+    return Inertia::render('About');
+})->name('about');
     
 // Route::post('/users/destroy', [UserController::class, 'delete_user'])->name('user.delete'); // testing
 // Route::get('/users/delete', function(){
@@ -62,9 +78,9 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::get('/secret', function(){
-    return Storage::disk('local')->response("secret.txt");
-});
+// Route::get('/secret', function(){
+//     return Storage::disk('local')->response("secret.txt");
+// });
 Route::get('/users', [UserController::class, 'get_all_editor'])->name('get_all_editor');
  
 Route::get('/managements/get-all', [ManagementManage::class, 'get_all_management_member'])->name('get_all_managements');
