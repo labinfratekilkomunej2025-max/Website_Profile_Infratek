@@ -33,6 +33,8 @@ export default function AccountsPage({ accounts }: Props) {
     is_admin: false,
     is_active: true,
     password: "",
+    is_change_password: true,
+    password_confirmation: "",
   });
 
   // ✅ Flash message handler (SAMA PERSIS)
@@ -55,6 +57,8 @@ export default function AccountsPage({ accounts }: Props) {
       is_admin: false,
       is_active: true,
       password:"",
+      is_change_password:true,
+      password_confirmation: "",
     });
     setOpen(true);
   };
@@ -67,6 +71,8 @@ export default function AccountsPage({ accounts }: Props) {
       is_admin: account.is_admin,
       is_active: account.is_active,
       password: "",
+      is_change_password:false,
+      password_confirmation: "",
     });
     setOpen(true);
   };
@@ -76,11 +82,11 @@ export default function AccountsPage({ accounts }: Props) {
     if (form.is_admin && !confirm("The is admin column is checked, are you sure want to proceed?")) return;
     if (mode === "create") {
       router.post(route("users.store"), form, {
-        onSuccess: () => setOpen(false),
+        onSuccess: () => {setOpen(false); console.log('success');},
       });
     } else {
       router.put(route("users.update"), form, {
-        onSuccess: () => setOpen(false),
+        onSuccess: () => {setOpen(false); console.log('success');},
       });
     }
   };
@@ -159,21 +165,19 @@ export default function AccountsPage({ accounts }: Props) {
                   <div className="text-red-500 text-xs mt-1">{errors.name}</div>
                 )}
               </div>
-              <div>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="Newer Password"
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full border rounded-xl px-3 py-2 text-sm"
-                />
-                {errors?.password && (
-                  <div className="text-red-500 text-xs mt-1">{errors.password}</div>
-                )}
-              </div>
 
               <div className="flex gap-6 text-sm">
+                <label className="flex items-center gap-2">
+                  <Checkbox
+                    name="is_change_password"
+                    checked={form.is_change_password}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      {if (mode=='create') return; 
+                      setForm({ ...form, is_change_password: e.target.checked })}
+                    }
+                  />
+                  New Password
+                </label>
                 <label className="flex items-center gap-2">
                   <Checkbox
                     name="is_admin"
@@ -196,6 +200,36 @@ export default function AccountsPage({ accounts }: Props) {
                   Active
                 </label>
               </div>
+
+              {form.is_change_password && (
+              <>
+              <div>
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Newer Password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  className="w-full border rounded-xl px-3 py-2 text-sm"
+                />
+                {errors?.password && (
+                  <div className="text-red-500 text-xs mt-1">{errors.password}</div>
+                )}
+              </div>
+              <div>
+                <input
+                  id="password_confirmation"
+                  type="password"
+                  placeholder="Write the Same Password"
+                  value={form.password_confirmation}
+                  onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })}
+                  className="w-full border rounded-xl px-3 py-2 text-sm"
+                />
+                {errors?.password_confirmation && (
+                  <div className="text-red-500 text-xs mt-1">{errors.password_confirmation}</div>
+                )}
+              </div>
+              </>)}
 
               <div className="flex justify-end gap-2 pt-2">
                 <button

@@ -16,10 +16,6 @@ use Carbon\Carbon;
 
 class MemberManage extends Controller
 {
-    public function get_all_member(){
-        $member_pos = Member::with(['position', 'management_detail', 'management_detail.period'])->get();
-        return response()->json(["data"=>$member_pos]);
-    }
     public function index_member(): Response
     {
         return Inertia::render('Management/MemberPage', [

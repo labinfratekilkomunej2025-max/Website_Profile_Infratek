@@ -27,35 +27,35 @@ class MemberSeeder extends Seeder
             [
                 'full_name'=> 'Yanuar Nurdiansyah, ST., M.Cs.',
                 'position_id'=> 1,
-                'photo_path'=> '', // Use name only
+                'photo_path'=> 'yanuar.png', // Use file name only
                 'created_at'=> Carbon::now(),
                 'edited_at'=> Carbon::now(),
             ],
             [
                 'full_name'=> 'Widya Dwinoto Darmawan, ST',
                 'position_id'=> 2,
-                'photo_path'=> '', // Use name only
+                'photo_path'=> 'widy.png', // Use file name only
                 'created_at'=> Carbon::now(),
                 'edited_at'=> Carbon::now(),
             ],
             [
                 'full_name'=> 'Kediv',
                 'position_id'=> 6,
-                'photo_path'=> '', // Use name only
+                'photo_path'=> '', // Use file name only
                 'created_at'=> Carbon::now(),
                 'edited_at'=> Carbon::now(),
             ],
             [
                 'full_name'=> 'Aggota 1',
                 'position_id'=> 7,
-                'photo_path'=> '', // Use name only
+                'photo_path'=> '', // Use file name only
                 'created_at'=> Carbon::now(),
                 'edited_at'=> Carbon::now(),
             ],
             [
                 'full_name'=> 'Anggota 2',
                 'position_id'=> 7,
-                'photo_path'=> '', // Use name only
+                'photo_path'=> '', // Use file name only
                 'created_at'=> Carbon::now(),
                 'edited_at'=> Carbon::now(),
             ],

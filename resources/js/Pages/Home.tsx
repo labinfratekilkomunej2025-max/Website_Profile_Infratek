@@ -1,16 +1,15 @@
 
 import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
-import { NavbarProps } from '@/types';
+import { NavbarPropsHome } from '@/types';
 import { Head } from '@inertiajs/react';
 
 
 export default function Home({
   CurrentPath,
-  // HomePath,
-  // GalleryPath,
-  // ContactPath,
-}: NavbarProps
+  KepalaPhotoPath,
+  PranataPhotoPath,
+}: NavbarPropsHome
 ) {
   const storageUrl: string = window.appConfig.storageUrl;
   return (
@@ -118,7 +117,7 @@ export default function Home({
                 <div className="relative w-full aspect-square bg-gradient-to-br from-blue-400 to-blue-600 overflow-hidden">
                   <div className="relative w-full h-full">
                     <img
-                        src={`${storageUrl}/struktur_organisasi/yanuar.png`}
+                        src={KepalaPhotoPath}
                         alt={`Yanuar Nurdiansyah`}
                         className="absolute inset-0 w-full h-full object-cover"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 320px, 384px"
@@ -156,7 +155,7 @@ export default function Home({
                 <div className="relative w-full aspect-square bg-gradient-to-br from-blue-500 to-blue-700 overflow-hidden">
                    <div className="relative w-full h-full">
                     <img
-                        src={`${storageUrl}/struktur_organisasi/widy.png`}
+                        src={PranataPhotoPath}
                         alt={`Widya Dwinoto Darmawan`}
                         className="absolute inset-0 w-full h-full object-cover"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 320px, 384px"

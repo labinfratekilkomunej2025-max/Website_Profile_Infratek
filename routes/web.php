@@ -11,27 +11,13 @@ use App\Http\Controllers\MemberManagement\ManagementManage;
 use App\Http\Controllers\MemberManagement\AccountManage;
 use App\Http\Controllers\MemberManagement\PositionController;
 use App\Http\Controllers\MemberManagement\PeriodController;
-
-function getPaths(string $currentPath){
-    return [
-        'CurrentPath'=>$currentPath,
-        // 'HomePath'=>route('home'),
-        // 'GalleryPath'=>route('gallery'),
-        // 'ContactPath'=>route('contact'),
-    ];
-}
+use App\Http\Controllers\GuestController;
 
 // For routes that can be accessed for anyone
 Route::middleware('guest')->group(function () {
-    Route::get('/', function(Request $request){
-        return Inertia::render('Home', getPaths($request->url()));
-    })->name('home');
-    Route::get('/gallery', function(Request $request){
-        return Inertia::render('gallery/page', getPaths($request->url()));
-    })->name('gallery');
-    Route::get('/contact', function(Request $request){
-        return Inertia::render('contact/page', getPaths($request->url()));
-    })->name('contact');
+    Route::get('/', [GuestController::class, 'Home'])->name('home');
+    Route::get('/gallery', [GuestController::class, 'Gallery'])->name('gallery');
+    Route::get('/contact', [GuestController::class, 'Contact'])->name('contact');
 });
 
 // For routes that can only be accessed by Editor or Admin
@@ -70,7 +56,6 @@ Route::get('/users', [UserController::class, 'get_all_editor'])->name('get_all_e
 Route::get('/managements/get-all', [ManagementManage::class, 'get_all_management_member'])->name('get_all_managements');
 Route::get('/managements', [ManagementManage::class, 'index_per_pos'])->name('managements.index_per_pos');
 Route::get('/managements/per-pos', [ManagementManage::class, 'get_all_period_position'])->name('get_all_per_pos');
-Route::get('/members', [MemberManage::class, 'get_all_member'])->name('get_all_members');
 
 Route::name('positions.')->prefix('position')->group(function () {
     Route::get('all', [PositionController::class, 'get_all'])->name('all');

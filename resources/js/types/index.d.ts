@@ -1,3 +1,5 @@
+import Navbar from "@/Components/Navbar";
+
 export interface User {
     id: number;
     name: string;
@@ -20,7 +22,8 @@ export type PageProps<
 };
 type NavbarProps = {
   CurrentPath: string
-//   HomePath: string
-//   GalleryPath: string
-//   ContactPath: string
+}
+type NavbarPropsHome = NavbarProps & {
+    KepalaPhotoPath: string;
+    PranataPhotoPath: string;
 }
