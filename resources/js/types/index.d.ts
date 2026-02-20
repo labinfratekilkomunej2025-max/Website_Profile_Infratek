@@ -23,7 +23,3 @@ export type PageProps<
 type NavbarProps = {
   CurrentPath: string
 }
-type NavbarPropsHome = NavbarProps & {
-    KepalaPhotoPath: string;
-    PranataPhotoPath: string;
-}
