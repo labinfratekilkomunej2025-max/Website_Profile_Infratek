@@ -29,6 +29,19 @@ Route::middleware('adminAuth')->group(function(){
     Route::get('auth/test-admin', function(Request $request){
     }); 
 });
+
+Route::get('/news', function () {
+    return Inertia::render('News');
+})->name('news');
+
+Route::get('/news/{slug}', function ($slug) {
+    // Kita kirim $slug ke komponen React agar bisa dipakai (nanti buat fetch data)
+    return Inertia::render('NewsDetail', ['slug' => $slug]);
+})->name('news.detail');
+
+Route::get('/about', function () {
+    return Inertia::render('About');
+})->name('about');
     
 // Route::post('/users/destroy', [UserController::class, 'delete_user'])->name('user.delete'); // testing
 // Route::get('/users/delete', function(){
@@ -48,9 +61,9 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::get('/secret', function(){
-    return Storage::disk('local')->response("secret.txt");
-});
+// Route::get('/secret', function(){
+//     return Storage::disk('local')->response("secret.txt");
+// });
 Route::get('/users', [UserController::class, 'get_all_editor'])->name('get_all_editor');
  
 Route::get('/managements/get-all', [ManagementManage::class, 'get_all_management_member'])->name('get_all_managements');
