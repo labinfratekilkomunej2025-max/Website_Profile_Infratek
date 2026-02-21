@@ -22,7 +22,7 @@ class ManagementManage extends Controller
     }
 
     public function get_all_management_member(){
-        $excluded_pos = ["KEPALA LABORATORIUM", "PRANATA LABORATORIUM"];
+        $excluded_pos = ["Kepala Laboratorium", "Pranata Laboratorium"];
         $member_pos = Position::has('members')->whereNotIn('name', $excluded_pos)->with(['members', 'members.management_detail'])->get();
         return response()->json(["data"=>$member_pos]);
     }

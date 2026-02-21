@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             MemberSeeder::class,
+            DivisionSeeder::class,
             ManagementDetailSeeder::class,
         ]);
         // User::factory()->create([

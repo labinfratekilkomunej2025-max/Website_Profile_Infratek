@@ -15,20 +15,29 @@ class ManagementDetailSeeder extends Seeder
     {
         DB::table('periods')->insert([
             [
-                'title' => 'KEPENGURUSAN ANGKATAN 2025/2026',
+                'title' => 'Periode 2025/2026',
             ],
         ]);
-        $period_id = DB::table('periods')->where('title', 'KEPENGURUSAN ANGKATAN 2025/2026')->first()->id;
         DB::table('management_details')->insert([
             [
+                'member_id' => 1,
+                'period_id' => 1,
+                'position_id' => 1,
+            ],
+            [
+                'member_id' => 2,
+                'period_id' => 1,
+                'position_id' => 1,
+            ],
+            [
                 'member_id' => 4,
-                'linkedin_link' => 'https://www.linkedin.com',
-                'period_id' => $period_id,
+                'period_id' => 1,
+                'position_id' => 3,
             ],
             [
                 'member_id' => 5,
-                'linkedin_link' => 'https://www.linkedin.com',
-                'period_id' => $period_id,
+                'period_id' => 1,
+                'position_id' => 3,
             ],
         ]);
     }
