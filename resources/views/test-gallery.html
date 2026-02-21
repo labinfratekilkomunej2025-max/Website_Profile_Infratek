@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Gallery Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .gallery-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .gallery-item img {
+            max-width: 200px;
+            height: auto;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🖼️ Gallery API Test</h1>
+    <p><strong>Note:</strong> Login dulu bang </p>
+
+    <!-- Create Gallery -->
+    <div class="section">
+        <h2>1. Create Gallery</h2>
+        <input type="text" id="title" placeholder="Gallery Title" value="Test Gallery">
+        <textarea id="description" placeholder="Description">Ini adalah gallery untuk testing</textarea>
+        <label>
+            <input type="checkbox" id="is_public"> Publish (is_public)
+        </label>
+        <button onclick="createGallery()">Create Gallery</button>
+        <div class="result" id="createResult"></div>
+    </div>
+
+    <!-- Upload Images -->
+    <div class="section">
+        <h2>2. Upload Images to Gallery</h2>
+        <input type="number" id="galleryId" placeholder="Gallery ID" value="1">
+        <input type="file" id="images" multiple accept="image/*">
+        <button onclick="uploadImages()">Upload Images</button>
+        <div class="result" id="uploadResult"></div>
+    </div>
+
+    <!-- Get All Galleries -->
+    <div class="section">
+        <h2>3. Get All Galleries</h2>
+        <label>
+            <input type="checkbox" id="publicOnly"> Public Only
+        </label>
+        <button onclick="getAllGalleries()">Get Galleries</button>
+        <div class="result" id="galleriesResult"></div>
+    </div>
+
+    <!-- Get Single Gallery -->
+    <div class="section">
+        <h2>4. Get Single Gallery</h2>
+        <input type="number" id="singleGalleryId" placeholder="Gallery ID" value="1">
+        <button onclick="getSingleGallery()">Get Gallery</button>
+        <div class="result" id="singleResult"></div>
+    </div>
+
+    <script>
+        // Get CSRF token from meta tag (make sure it's in your layout)
+        function getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        }
+
+        // 1. Create Gallery
+        async function createGallery() {
+            const data = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                is_public: document.getElementById('is_public').checked
+            };
+
+            try {
+                const response = await fetch('/galleries', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': getCsrfToken()
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                document.getElementById('createResult').innerHTML = 
+                    '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                
+                if (result.success && result.data) {
+                    document.getElementById('galleryId').value = result.data.id;
+                    document.getElementById('singleGalleryId').value = result.data.id;
+                }
+            } catch (error) {
+                document.getElementById('createResult').innerHTML = 
+                    '<strong style="color: red;">Error:</strong> ' + error.message;
+            }
+        }
+
+        // 2. Upload Images
+        async function uploadImages() {
+            const galleryId = document.getElementById('galleryId').value;
+            const files = document.getElementById('images').files;
+
+            if (!files.length) {
+                alert('Please select at least one image!');
+                return;
+            }
+
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('images[]', files[i]);
+            }
+
+            try {
+                const response = await fetch(`/galleries/${galleryId}/images`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': getCsrfToken()
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                let html = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                
+                // Show uploaded images
+                if (result.success && result.data) {
+                    html += '<h4>Uploaded Images:</h4>';
+                    result.data.forEach(img => {
+                        html += `<img src="${img.image_url}" alt="Uploaded">`;
+                    });
+                }
+                
+                document.getElementById('uploadResult').innerHTML = html;
+            } catch (error) {
+                document.getElementById('uploadResult').innerHTML = 
+                    '<strong style="color: red;">Error:</strong> ' + error.message;
+            }
+        }
+
+        // 3. Get All Galleries
+        async function getAllGalleries() {
+            const publicOnly = document.getElementById('publicOnly').checked;
+            const url = publicOnly ? '/galleries?public_only=true' : '/galleries';
+
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                let html = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                
+                // Display galleries with images
+                if (result.success && result.data?.data) {
+                    html += '<h4>Galleries:</h4>';
+                    result.data.data.forEach(gallery => {
+                        html += `
+                            <div class="gallery-item">
+                                <h5>${gallery.title}</h5>
+                                <p>${gallery.description}</p>
+                                <p><strong>Status:</strong> ${gallery.is_public ? '✅ Published' : '❌ Draft'}</p>
+                                <p><strong>Images (${gallery.images.length}):</strong></p>
+                        `;
+                        gallery.images.forEach(img => {
+                            html += `<img src="${img.image_url}" alt="${gallery.title}">`;
+                        });
+                        html += '</div>';
+                    });
+                }
+                
+                document.getElementById('galleriesResult').innerHTML = html;
+            } catch (error) {
+                document.getElementById('galleriesResult').innerHTML = 
+                    '<strong style="color: red;">Error:</strong> ' + error.message;
+            }
+        }
+
+        // 4. Get Single Gallery
+        async function getSingleGallery() {
+            const id = document.getElementById('singleGalleryId').value;
+
+            try {
+                const response = await fetch(`/galleries/${id}`);
+                const result = await response.json();
+                
+                let html = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                
+                // Display gallery with images
+                if (result.success && result.data) {
+                    const gallery = result.data;
+                    html += `
+                        <div class="gallery-item">
+                            <h5>${gallery.title}</h5>
+                            <p>${gallery.description}</p>
+                            <p><strong>Status:</strong> ${gallery.is_public ? '✅ Published' : '❌ Draft'}</p>
+                            <p><strong>Images (${gallery.images.length}):</strong></p>
+                    `;
+                    gallery.images.forEach(img => {
+                        html += `<img src="${img.image_url}" alt="${gallery.title}">`;
+                    });
+                    html += '</div>';
+                }
+                
+                document.getElementById('singleResult').innerHTML = html;
+            } catch (error) {
+                document.getElementById('singleResult').innerHTML = 
+                    '<strong style="color: red;">Error:</strong> ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

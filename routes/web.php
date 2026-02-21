@@ -49,3 +49,7 @@ Route::middleware(['auth'])->prefix('galleries')->name('galleries.')->group(func
     // Delete image
     Route::delete('/{galleryId}/images/{imageId}', [GalleryController::class, 'deleteImage'])->name('delete-image');
 });
+
+Route::get('/test/gallery', function () {
+    return view('test.gallery');
+})->name('test.gallery');
