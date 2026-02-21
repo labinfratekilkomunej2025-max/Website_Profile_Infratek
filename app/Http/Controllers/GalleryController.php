@@ -7,8 +7,8 @@ use App\Models\GalleryImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class GalleryController extends Controller
 {
@@ -37,62 +37,19 @@ class GalleryController extends Controller
         $perPage = $request->get('per_page', 10);
         $galleries = $query->latest('created_at')->paginate($perPage);
 
+        // Add image URLs to each gallery
+        $galleries->getCollection()->transform(function ($gallery) {
+            $gallery->images->transform(function ($image) use ($gallery) {
+                $image->image_url = route('galleries.image', ['gallery' => $gallery->id, 'image' => $image->id]);
+                return $image;
+            });
+            return $gallery;
+        });
+
         return response()->json([
             'success' => true,
             'data' => $galleries
         ], 200);
-    }
-
-    /**
-     * Store a newly created gallery.
-     * 
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function store(Request $request)
-    {
-        // Validasi input
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'is_public' => 'boolean',
-            // edited_by_id akan diambil dari auth user (nanti setelah auth selesai)
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        try {
-            DB::beginTransaction();
-
-            // Create gallery
-            $gallery = Gallery::create([
-                'title' => $request->title,
-                'description' => $request->description,
-                'is_public' => $request->is_public ?? false,
-                'edited_by_id' => Auth::id(), // TODO: ganti dengan auth()->id() setelah auth ready
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Gallery created successfully',
-                'data' => $gallery->load('images')
-            ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create gallery',
-                'error' => $e->getMessage()
-            ], 500);
-        }
     }
 
     /**
@@ -112,10 +69,67 @@ class GalleryController extends Controller
             ], 404);
         }
 
+        // Add image URLs
+        $gallery->images->transform(function ($image) use ($gallery) {
+            $image->image_url = route('galleries.image', ['gallery' => $gallery->id, 'image' => $image->id]);
+            return $image;
+        });
+
         return response()->json([
             'success' => true,
             'data' => $gallery
         ], 200);
+    }
+
+    /**
+     * Store a newly created gallery.
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'is_public' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Create gallery
+            $gallery = Gallery::create([
+                'title' => $request->title,
+                'description' => $request->description,
+                'is_public' => $request->is_public ?? false,
+                'edited_by_id' => Auth::id(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Gallery created successfully',
+                'data' => $gallery->load('images')
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create gallery',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -155,7 +169,7 @@ class GalleryController extends Controller
                 'title' => $request->title ?? $gallery->title,
                 'description' => $request->description ?? $gallery->description,
                 'is_public' => $request->is_public ?? $gallery->is_public,
-                'edited_by_id' => $request->user_id ?? 1, // TODO: ganti dengan auth()->id()
+                'edited_by_id' => Auth::id(),
             ]);
 
             return response()->json([
@@ -192,6 +206,7 @@ class GalleryController extends Controller
 
         try {
             $gallery->is_public = !$gallery->is_public;
+            $gallery->edited_by_id = Auth::id();
             $gallery->save();
 
             return response()->json([
@@ -234,7 +249,9 @@ class GalleryController extends Controller
 
             // Hapus semua gambar dari storage
             foreach ($gallery->images as $image) {
-                Storage::disk('private')->delete($image->image_path);
+                if ($image->image_path != null && Storage::disk('private_gallery_images')->exists($image->image_path)) {
+                    Storage::disk('private_gallery_images')->delete($image->image_path);
+                }
             }
 
             // Hapus gallery (cascade delete akan handle gallery_images)
@@ -294,20 +311,17 @@ class GalleryController extends Controller
             $uploadedImages = [];
 
             foreach ($request->file('images') as $image) {
-                // TODO: Implementasi save file sesuai petunjuk Adit
-                // Sementara ini placeholder, nanti akan diupdate setelah Adit selesai auth
-                
-                // Contoh structure (akan diupdate):
-                // $path = $image->store('/', 'private_gallery_images');
-                
-                $path = 'placeholder/path/' . $image->getClientOriginalName();
+                // Store file using Adit's pattern
+                $path = $image->store('', 'private_gallery_images');
 
                 $galleryImage = GalleryImage::create([
                     'gallery_id' => $galleryId,
-                    'uploaded_by_id' => Auth::id(), // TODO: ganti dengan auth()->id()
+                    'uploaded_by_id' => Auth::id(),
                     'image_path' => $path
                 ]);
 
+                // Add image URL
+                $galleryImage->image_url = route('galleries.image', ['gallery' => $galleryId, 'image' => $galleryImage->id]);
                 $uploadedImages[] = $galleryImage;
             }
 
@@ -362,7 +376,9 @@ class GalleryController extends Controller
             DB::beginTransaction();
 
             // Hapus file dari storage
-            Storage::disk('private')->delete($image->image_path);
+            if ($image->image_path != null && Storage::disk('private_gallery_images')->exists($image->image_path)) {
+                Storage::disk('private_gallery_images')->delete($image->image_path);
+            }
 
             // Hapus record dari database
             $image->delete();
@@ -382,5 +398,27 @@ class GalleryController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Serve gallery image (following Adit's pattern)
+     * 
+     * @param Gallery $gallery
+     * @param GalleryImage $image
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse|null
+     */
+    public function image(Gallery $gallery, GalleryImage $image)
+    {
+        // Check if image belongs to this gallery
+        if ($image->gallery_id !== $gallery->id) {
+            abort(404);
+        }
+
+        // Serve image if exists
+        if ($image->image_path != null && Storage::disk('private_gallery_images')->exists($image->image_path)) {
+            return Storage::disk('private_gallery_images')->response($image->image_path);
+        }
+        
+        return null;
     }
 }

@@ -1,47 +1,51 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\GalleryController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use Illuminate\Http\Request;
 
-function getPaths(string $currentPath){
-    return [
-        'CurrentPath'=>$currentPath,
-        // 'HomePath'=>route('home'),
-        // 'GalleryPath'=>route('gallery'),
-        // 'ContactPath'=>route('contact'),
-    ];
-}
+/*
+|--------------------------------------------------------------------------
+| Gallery Routes - UPDATED
+|--------------------------------------------------------------------------
+|
+| Routes untuk fitur Gallery dengan image serving
+| Pattern mengikuti MemberManage dari Adit
+|
+| CATATAN: 
+| - Tambahkan ke routes/web.php (bukan api.php)
+| - Image serving harus di web.php untuk bisa akses file
+|
+*/
 
-// Route::get('/', function () {
-//     return Inertia::render('Welcome', [
-//         'canLogin' => Route::has('login'),
-//         'canRegister' => Route::has('register'),
-//         'laravelVersion' => Application::VERSION,
-//         'phpVersion' => PHP_VERSION,
-//     ]);
-// });
-
-Route::get('/', function(Request $request){
-    return Inertia::render('Home', getPaths($request->url()));
-})->name('home');
-Route::get('/gallery', function(Request $request){
-    return Inertia::render('gallery/page', getPaths($request->url()));
-})->name('gallery');
-Route::get('/contact', function(Request $request){
-    return Inertia::render('contact/page', getPaths($request->url()));
-})->name('contact');
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// Public Routes - bisa diakses siapa saja
+Route::prefix('galleries')->name('galleries.')->group(function () {
+    // Get all galleries
+    Route::get('/', [GalleryController::class, 'index'])->name('index');
+    
+    // Get single gallery
+    Route::get('/{id}', [GalleryController::class, 'show'])->name('show');
+    
+    // Serve image (public access untuk yang published)
+    Route::get('/{gallery}/image/{image}', [GalleryController::class, 'image'])->name('image');
 });
 
-require __DIR__.'/auth.php';
+// Protected Routes - hanya yang sudah login
+Route::middleware(['auth'])->prefix('galleries')->name('galleries.')->group(function () {
+    // Create gallery
+    Route::post('/', [GalleryController::class, 'store'])->name('store');
+    
+    // Update gallery
+    Route::put('/{id}', [GalleryController::class, 'update'])->name('update');
+    
+    // Delete gallery
+    Route::delete('/{id}', [GalleryController::class, 'destroy'])->name('destroy');
+    
+    // Toggle publish
+    Route::patch('/{id}/toggle-publish', [GalleryController::class, 'togglePublish'])->name('toggle-publish');
+    
+    // Upload images
+    Route::post('/{id}/images', [GalleryController::class, 'uploadImages'])->name('upload-images');
+    
+    // Delete image
+    Route::delete('/{galleryId}/images/{imageId}', [GalleryController::class, 'deleteImage'])->name('delete-image');
+});
