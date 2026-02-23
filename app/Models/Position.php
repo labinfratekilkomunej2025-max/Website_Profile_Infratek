@@ -16,8 +16,8 @@ class Position extends Model
     public function members():HasMany{
         return $this->hasMany(Member::class);
     }
-    public function divisions():BelongsTo
+    public function division():BelongsTo
     {
-        return $this->belongsTo(Division::class);
+        return $this->belongsTo(Division::class, 'division_id');
     }
 }

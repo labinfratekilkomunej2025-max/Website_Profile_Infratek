@@ -16,13 +16,11 @@ class PeriodController extends Controller
         Period::create($validated);
         return back()->with('success', 'Period Created Succesfully');
     }
-    public function update(Request $request)
+    public function update(Period $period, Request $request)
     {
         $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255', 'unique:periods,title'],
-            'id' => ['required', 'exists:periods,id'],
+            'title' => ['required', 'string', 'max:255'],
         ]);
-        $period = Period::find($validated['id']);
         if ($period->title != $validated['title'])
         {
             $period->title = $validated['title'];

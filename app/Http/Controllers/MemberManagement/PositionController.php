@@ -12,22 +12,24 @@ class PositionController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:positions,name'],
+            'order' => ['required', 'integer'],
         ]);
         Position::create($validated);
         return back()->with('success', 'Position Created Succesfully');
     }
-    public function update(Request $request)
+    public function update(Position $position, Request $request)
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:positions,name'],
-            'id' => ['required', 'exists:positions,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'order' => ['required', 'integer'],
         ]);
-        $position = Position::find($validated['id']);
         if ($position->name != $validated['name'])
         {
             $position->name = $validated['name'];
-            $position->save();
+            
         }
+        $position->order = $validated['order'];
+        $position->save();
         return back()->with('success', 'Position Edited Succesfully');
     }
     public function destroy(Position $position)

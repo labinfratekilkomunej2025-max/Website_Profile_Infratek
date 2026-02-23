@@ -11,6 +11,7 @@ use App\Http\Controllers\MemberManagement\ManagementManage;
 use App\Http\Controllers\MemberManagement\AccountManage;
 use App\Http\Controllers\MemberManagement\PositionController;
 use App\Http\Controllers\MemberManagement\PeriodController;
+use App\Http\Controllers\MemberManagement\DivisionController;
 use App\Http\Controllers\GuestController;
 
 // For routes that can be accessed for anyone
@@ -18,6 +19,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/', [GuestController::class, 'Home'])->name('home');
     Route::get('/gallery', [GuestController::class, 'Gallery'])->name('gallery');
     Route::get('/contact', [GuestController::class, 'Contact'])->name('contact');
+    Route::get('/coba/{period}', [GuestController::class, 'GetMembers'])->name('coba');
 });
 
 // For routes that can only be accessed by Editor or Admin
@@ -73,13 +75,19 @@ Route::get('/managements/per-pos', [ManagementManage::class, 'get_all_period_pos
 Route::name('positions.')->prefix('position')->group(function () {
     Route::get('all', [PositionController::class, 'get_all'])->name('all');
     Route::post('store', [PositionController::class, 'store'])->name('store');
-    Route::put('update', [PositionController::class, 'update'])->name('update');
+    Route::put('update/{position}', [PositionController::class, 'update'])->name('update');
     Route::delete('destroy/{position}', [PositionController::class, 'destroy'])->name('destroy');
+});
+Route::name('divisions.')->prefix('division')->group(function () {
+    Route::get('all', [DivisionController::class, 'get_all'])->name('all');
+    Route::post('store', [DivisionController::class, 'store'])->name('store');
+    Route::put('update/{division}', [DivisionController::class, 'update'])->name('update');
+    Route::delete('destroy/{division}', [DivisionController::class, 'destroy'])->name('destroy');
 });
 Route::name('periods.')->prefix('periods')->group(function () {
     Route::get('all', [PeriodController::class, 'get_all'])->name('all');
     Route::post('store', [PeriodController::class, 'store'])->name('store');
-    Route::put('update', [PeriodController::class, 'update'])->name('update');
+    Route::put('update/{period}', [PeriodController::class, 'update'])->name('update');
     Route::delete('destroy/{period}', [PeriodController::class, 'destroy'])->name('destroy');
 });
 Route::name('members.')->prefix('members')->group(function () {
@@ -95,6 +103,12 @@ Route::name('users.')->prefix('users')->group(function () {
     Route::put('update', [AccountManage::class, 'update'])->name('update');
     Route::delete('destroy/{user}', [AccountManage::class, 'destroy'])->name('destroy');
 });
+Route::name('management-details.')->prefix('management-details')->group(function () {
+    Route::post('store', [ManagementManage::class, 'detail_store'])->name('store');
+    Route::put('update/{management_detail}', [ManagementManage::class, 'detail_update'])->name('update');
+    Route::delete('destroy/{management_detail}', [ManagementManage::class, 'detail_destroy'])->name('destroy');
+});
+
     // $path = $request->file('avatar')->store('/', 'private_gallery_images');
     // $path = $request->file('avatar')->store('/', 'private_news_images');
     // $path = $request->file('avatar')->store('/', 'member_photos');

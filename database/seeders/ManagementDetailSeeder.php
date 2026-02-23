@@ -27,12 +27,12 @@ class ManagementDetailSeeder extends Seeder
             [
                 'member_id' => 2,
                 'period_id' => 1,
-                'position_id' => 1,
+                'position_id' => 2,
             ],
             [
                 'member_id' => 4,
                 'period_id' => 1,
-                'position_id' => 3,
+                'position_id' => 6,
             ],
             [
                 'member_id' => 5,

@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { router, usePage, useForm } from "@inertiajs/react";
 
-type Position = { id: number; name: string };
+type Position = { id: number; name: string; order: number };
 type Period = { id: number; title: string };
+type Division = { id: number; name: string; order:number };
 
 type Props = {
   positions: Position[];
   periods: Period[];
+  divisions: Division[];
 };
 
-export default function ManageMetaPage({ positions, periods }: Props) {
+export default function ManageMetaPage({ positions, periods, divisions }: Props) {
   const { props } = usePage();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"create" | "edit">("create");
-  const [type, setType] = useState<"position" | "period">("position");
+  const [type, setType] = useState<"Position" | "Period" | "Division">("Position");
   const [message, setMessage] = useState<string | null>(null);
   const [text_color, setTextColor] = useState<string>("text");
 
-  const [form, setForm] = useState<any>({ id: null, name: "", title: "" });
+  const [form, setForm] = useState<any>({ id: null, name: "", title: "", order: 1 });
 
   useEffect(() => {
     if (props.flash?.success) {setMessage(`Success: ${props.flash.success}`); setTextColor("text-green-600")}
@@ -33,57 +35,72 @@ export default function ManageMetaPage({ positions, periods }: Props) {
         setMessage(`Data Error: ${data_error_msg}`); setTextColor("text-red-600 font-bold")};
   }, [props.flash]);
 
-  const openCreate = (resourceType: "position" | "period") => {
+  const openCreate = (resourceType: "Position" | "Period" | "Division") => {
     setMode("create");
     setType(resourceType);
-    setForm({ id: null, name: "", title: "" });
+    setForm({ id: null, name: "", title: "", order: 1});
     setOpen(true);
   };
 
-  const openEdit = (resourceType: "position" | "period", item: any) => {
+  const openEdit = (resourceType: "Position" | "Period" | "Division", item: any) => {
     setMode("edit");
     setType(resourceType);
     setForm({
       id: item.id,
       name: item.name ?? "",
       title: item.title ?? "",
+      order: 1,
     });
     setOpen(true);
   };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (type === "position") {
+    switch(type){
+    case "Position":
       if (mode === "create") {
-        router.post(route("positions.store"), { name: form.name });
+        router.post(route("positions.store"), { name: form.name, order: form.order });
       } else {
-        router.put(route("positions.update"), { name: form.name, id:form.id});
+        router.put(route("positions.update", form.id), { name: form.name, order: form.order});
       }
-    } else {
+      break;
+    case "Period":
       if (mode === "create") {
         router.post(route("periods.store"), { title: form.title });
       } else {
-        router.put(route("periods.update"), { title: form.title, id:form.id });
+        router.put(route("periods.update", form.id), { title: form.title });
       }
+      break;
+    case "Division":
+      if (mode === "create") {
+        router.post(route("divisions.store"), { name: form.name, order: form.order });
+      } else {
+        router.put(route("divisions.update", form.id), { name: form.name, order: form.order });
+      }
+      break;
     }
 
     setOpen(false);
   };
 
-  const destroy = (resourceType: "position" | "period", id: number) => {
+  const destroy = (resourceType: "Position" | "Period" | "Division", id: number) => {
     if (!confirm("Yakin ingin menghapus data ini?")) return;
-
-    if (resourceType === "position") {
+    switch(resourceType){
+    case "Position":
       router.delete(route("positions.destroy", id));
-    } else {
+      break;
+    case "Period":
       router.delete(route("periods.destroy", id));
+      break;
+    case "Division":
+      router.delete(route("divisions.destroy", id));
+      break;
     }
   };
 
   const renderList = (
     title: string,
-    resourceType: "position" | "period",
+    resourceType: "Position" | "Period" | "Division",
     items: any[]
   ) => (
     <div style={{ border: "1px solid #ddd", borderRadius: 12, padding: 16 }}>
@@ -104,9 +121,12 @@ export default function ManageMetaPage({ positions, periods }: Props) {
               padding: 10,
             }}
           >
-            <div>{resourceType === "position" ? item.name : item.title}</div>
+            <div>{resourceType === "Period" ? item.title : item.name}</div>
 
             <div style={{ display: "flex", gap: 6 }}>
+              { resourceType != "Period" && (
+                <div>Order: {item.order}</div>
+              )}
               <button onClick={() => openEdit(resourceType, item)}>Edit</button>
               <button onClick={() => destroy(resourceType, item.id)}>Hapus</button>
             </div>
@@ -132,8 +152,9 @@ export default function ManageMetaPage({ positions, periods }: Props) {
         </div>
       )}
 
-      {renderList("Positions", "position", positions)}
-      {renderList("Periods", "period", periods)}
+      {renderList("Positions", "Position", positions)}
+      {renderList("Divisi", "Division", divisions)}
+      {renderList("Periods", "Period", periods)}
 
       {open && (
         <div
@@ -152,18 +173,27 @@ export default function ManageMetaPage({ positions, periods }: Props) {
             </h3>
 
             <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {type === "position" ? (
-                <input
-                  placeholder="Position name"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-              ) : (
+              {type === "Period" ? (
                 <input
                   placeholder="Period title"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                 />
+              ) : (
+                <>
+                  <input
+                    placeholder={type+" name"}
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                  <input
+                    type="number"
+                    min={1}
+                    placeholder={type+" order"}
+                    value={form.order}
+                    onChange={(e) => setForm({ ...form, order: e.target.value })}
+                  />
+                </>
               )}
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>

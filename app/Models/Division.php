@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Division extends Model
 {
@@ -12,8 +12,8 @@ class Division extends Model
         'order',
     ];
     public $timestamps = false;
-    public function positions():BelongsTo
+    public function positions():HasMany
     {
-        return $this->belongsTo(Position::class);
+        return $this->hasMany(Position::class);
     }
 }

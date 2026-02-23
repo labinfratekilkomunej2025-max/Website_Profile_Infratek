@@ -12,47 +12,38 @@ use Inertia\Response;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 
 class MemberManage extends Controller
 {
-    public function index_member(): Response
+    public function index_member()
     {
+        $members = Member::with(['management_detail', 'management_detail.period', 'management_detail.position', 'management_detail.position.division'])->get();
+        Log::info($members);
         return Inertia::render('Management/MemberPage', [
-            'members' => Member::with(['position', 'management_detail', 'management_detail.period'])->get(),
+            'members' => $members,
         ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'full_name' => ['required', 'max:255', 'unique:members,full_name'],
-            'position_id' => ['required', 'exists:positions,id'],
+            'full_name' => ['required', 'max:255'],
             'is_photo_update' => ['required', 'boolean'],
             'photo' => ['required_if:is_photo_update,1', 'file', 'mimes:jpeg,png', 'max:5000'], 
-            'is_detail' => ['required', 'boolean'],
-            'linkedin_link' => ['required_if:is_detail,1', 'string', 'max:255'],
-            'period_id' => ['required_if:is_detail,1', 'exists:periods,id'],
+            'linkedin_link' => ['nullable', 'string', 'max:255'],
         ]);
         $member = Member::create([
             'full_name' => $validated['full_name'],
-            'position_id' => $validated['position_id'],
+            'linkedin_link' => $validated['linkedin_link'],
             'photo_path' => '',
             'created_at' => Carbon::now(),
             'edited_at' => Carbon::now(),
         ]);
-        
         if ($validated['is_photo_update']){
             $result = $this::store_photo($validated['photo'], $member->photo_path);
             $member->photo_path = $result;
-        }
-        
-        if($validated['is_detail']){
-            $member_detail = ManagementDetail::create([
-                'member_id' => $member->id,
-                'linkedin_link' => $validated['linkedin_link'],
-                'period_id' => $validated['period_id'],
-            ]);
         }
         $member->save();
         return back()->with('success', $validated['is_photo_update'] ? 'Position Created Succesfully' : 'Position Created Succesfully. Refresh if The Photo Image not Shown');
@@ -62,12 +53,9 @@ class MemberManage extends Controller
         $validated = $request->validate([
             'id' => ['required', 'exists:members,id'],
             'full_name' => ['required', 'max:255'],
-            'position_id' => ['required', 'exists:positions,id'],
             'is_photo_update' => ['required', 'boolean'],
             'photo' => ['required_if:is_photo_update,1', 'file', 'mimes:jpeg,png', 'max:5000'], 
-            'is_detail' => ['required', 'boolean'],
-            'linkedin_link' => ['required_if:is_detail,1', 'string', 'max:255'],
-            'period_id' => ['required_if:is_detail,1', 'exists:periods,id'],
+            'linkedin_link' => ['required_if:is_detail,1', 'nullable', 'string', 'max:255'],
         ]);
         $member = Member::find($validated['id']);
         if ($member->full_name!=$validated['full_name']) {
@@ -75,36 +63,19 @@ class MemberManage extends Controller
             if ($is_new_name_exist)
             {
                 throw ValidationException::withMessages([
-                    'name' => 'The Name Already Exist.',
+                    'full_name' => 'The Name Already Exist.',
                 ]);
             }else
             {
                 $member->full_name=$validated['full_name'];
             }
         }
-        $result = "";
-        if ($validated['is_photo_update']) ($result = $this::store_photo($validated['photo'], $member->photo_path));
-        if ($result != "") ($member->photo_path = $result);
-        $member->position_id = $validated['position_id'];
-        $member->edited_at = Carbon::now();
-        $member_detail = $member->management_detail;
-        if($validated['is_detail']){
-            if ($member_detail==null){
-                $member_detail = ManagementDetail::create([
-                    'member_id' => $member->id,
-                    'linkedin_link' => $validated['linkedin_link'],
-                    'period_id' => $validated['period_id'],
-                ]);
-            }else{
-                $member_detail->linkedin_link = $validated['linkedin_link'];
-                $member_detail->period_id = $validated['period_id'];
-            }
-            $member_detail->save();
-        }else{
-            if ($member_detail!=null){
-                $member_detail->delete();
-            }
+        $member->linkedin_link = $validated['linkedin_link'];
+        if ($validated['is_photo_update']){
+            $result = $this::store_photo($validated['photo'], $member->photo_path);
+            $member->photo_path = $result;
         }
+        $member->edited_at = Carbon::now();
         $member->save();
 
         return back()->with('success', $validated['is_photo_update'] ? 'Position Created Succesfully' : 'Position Created Succesfully. Refresh if The Photo Image not Shown');
@@ -112,7 +83,7 @@ class MemberManage extends Controller
     public function destroy(Member $member)
     {
         $member->delete();
-        return back()->with('success', 'Position Deleted Succesfully');
+        return back()->with('success', 'Member Deleted Succesfully');
     }
     public function store_photo($file, $old_path)
     {

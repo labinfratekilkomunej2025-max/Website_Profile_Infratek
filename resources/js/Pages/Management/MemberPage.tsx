@@ -1,100 +1,120 @@
-import React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { router, usePage } from "@inertiajs/react";
-import {getLocalTime, escapeHtml} from '@/Utils';
-import Checkbox from '@/Components/Checkbox';
+import { getLocalTime } from "@/Utils";
 import InputLabel from "@/Components/InputLabel";
 
 type Member = {
   id: number;
   full_name: string;
-  position_id: number;
   photo_path: string;
   created_at: string;
   edited_at: string;
+  linkedin_link: string | null;
+  management_detail: ManagementDetail[];
+};
+
+type ManagementDetail = {
+  id: number;
+  member_id: number;
+  period_id: number;
+  position_id: number;
+  period: Period;
   position: Position;
-  management_detail: ManagementDetail;
 };
 
 type Position = {
   id: number;
   name: string;
+  order: number;
+};
+
+type Period = {
+  id: number;
+  title: string;
 };
 
 type Props = {
   members: Member[];
 };
 
-type ManagementDetail = {
-  linkedin_link: string;
-  period: Period;
-}
-type Period = {
-  id: number;
-  title: string;
-}
-
 export default function MembersPage({ members }: Props) {
   const { props } = usePage<any>();
-
   const errors = props.errors;
   const flash = props.flash;
 
   const [positions, setPositions] = useState<Position[]>([]);
   const [periods, setPeriods] = useState<Period[]>([]);
+
   const [open, setOpen] = useState(false);
-  const [is_detail_check, setIsDetail] = useState(false);
   const [mode, setMode] = useState<"create" | "edit">("create");
+
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailMode, setDetailMode] = useState<"create" | "edit">("create");
+
   const [message, setMessage] = useState<string | null>(null);
-  const [text_color, setTextColor] = useState<string>("text");
+  const [textColor, setTextColor] = useState("text");
 
   const [form, setForm] = useState({
     id: null as number | null,
     full_name: "",
-    position_id: "",
-    is_photo_update: "",
-    photo: null as File | null,
-    is_detail: "",
-    period_id: "",
     linkedin_link: "",
+    is_photo_update: '0',
+    photo: null as File | null,
   });
 
+  const [detailForm, setDetailForm] = useState({
+    id: null as number | null,
+    member_id: null as number | null,
+    position_id: "",
+    period_id: "",
+  });
+
+  /* LOAD DROPDOWNS */
   useEffect(() => {
     fetch(route("positions.all"))
       .then((res) => res.json())
-      .then((data) => setPositions(data))
-      .catch(() => console.error("Failed to load positions"));
+      .then((data) => setPositions(data));
   }, []);
+
   useEffect(() => {
     fetch(route("periods.all"))
       .then((res) => res.json())
-      .then((data) => setPeriods(data))
-      .catch(() => console.error("Failed to load periods"));
+      .then((data) => setPeriods(data));
   }, []);
 
+  /* FLASH MESSAGE */
   useEffect(() => {
-    if (flash?.success) {setMessage(`Success: ${props.flash.success}`); setTextColor("text-green-600")}
-    if (flash?.error) {setMessage(`Error: ${props.flash.error}`); setTextColor("text-red-600")}
+    if (flash?.success) {
+      setMessage(`Success: ${flash.success}`);
+      setTextColor("text-green-600");
+    }
+    if (flash?.error) {
+      setMessage(`Error: ${flash.error}`);
+      setTextColor("text-red-600");
+    }
   }, [flash]);
 
+  /* MEMBER HANDLERS */
   const openCreate = () => {
     setMode("create");
-    setForm({ id: null, full_name: "", position_id: "", photo: null, is_photo_update: '0',
-              is_detail: "0", period_id: "" ,linkedin_link: "" });
+    setForm({
+      id: null,
+      full_name: "",
+      linkedin_link: "",
+      is_photo_update: '0',
+      photo: null,
+    });
     setOpen(true);
   };
 
   const openEdit = (member: Member) => {
-    setIsDetail(member.management_detail!=null);
     setMode("edit");
     setForm({
       id: member.id,
       full_name: member.full_name,
-      position_id: String(member.position_id),
       is_photo_update: '0',
+      linkedin_link: member.linkedin_link ?? "",
       photo: null,
-      is_detail: is_detail_check ? '1' : '0',
-      period_id: String(member.management_detail?.period.id ?? ''),
-      linkedin_link: member.management_detail?.linkedin_link ?? '',
     });
     setOpen(true);
   };
@@ -103,23 +123,19 @@ export default function MembersPage({ members }: Props) {
     e.preventDefault();
 
     const data = new FormData();
-    // @ts-ignore
-    data.append("id", form.id);
+    if (form.id) data.append("id", String(form.id));
+    data.append('linkedin_link', form.linkedin_link);
     data.append("full_name", form.full_name);
-    data.append("position_id", form.position_id);
-    data.append("is_detail", is_detail_check ? '1' : '0');
-    if (form.photo) {data.append("photo", form.photo); data.append("is_photo_update", '1')}
-    else {data.append("is_photo_update", '0')};
-    if (is_detail_check) {data.append("linkedin_link", form.linkedin_link);data.append("period_id", form.period_id);};
+    if (form.photo) {data.append("is_photo_update", '1'); data.append("photo", form.photo)}else{data.append("is_photo_update", '0');};
+
     if (mode === "create") {
       router.post(route("members.store"), data, {
         onSuccess: () => setOpen(false),
       });
     } else {
-      console.log(form.is_photo_update)
+      console.log(errors);
       router.put(route("members.update"), data, {
         onSuccess: () => setOpen(false),
-        onError: (errors) => console.log(errors),
         forceFormData: true,
       });
     }
@@ -129,60 +145,138 @@ export default function MembersPage({ members }: Props) {
     if (!confirm("Yakin ingin menghapus member ini?")) return;
     router.delete(route("members.destroy", id));
   };
+  const destroyDetail = (id: number) => {
+    if (!confirm("Yakin ingin menghapus member ini?")) return;
+    router.delete(route("management-details.destroy", id));
+  };
+
+  /* DETAIL HANDLERS */
+  const openDetailCreate = (member: Member) => {
+    setDetailMode("create");
+    setDetailForm({
+      id: null,
+      member_id: member.id,
+      position_id: "",
+      period_id: "",
+    });
+    setDetailOpen(true);
+  };
+
+  const openDetailEdit = (member: Member, detail: ManagementDetail) => {
+    setDetailMode("edit");
+    setDetailForm({
+      id: detail.id,
+      member_id: member.id,
+      position_id: String(detail.position_id),
+      period_id: String(detail.period_id),
+    });
+    setDetailOpen(true);
+  };
+
+  const submitDetail = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      member_id: detailForm.member_id,
+      position_id: detailForm.position_id,
+      period_id: detailForm.period_id,
+    };
+
+    if (detailMode === "create") {
+      router.post(route("management-details.store"), payload, {
+        onSuccess: () => setDetailOpen(false),
+      });
+    } else {
+      router.put(route("management-details.update", String(detailForm.id)), payload, {
+        onSuccess: () => setDetailOpen(false),
+      });
+    }
+  };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-4">
-      <div className="flex justify-between items-center">
+    <div className="max-w-4xl mx-auto p-6 space-y-4">
+      <div className="flex justify-between">
         <h1 className="text-2xl font-semibold">Members</h1>
         <button
           onClick={openCreate}
-          className="px-4 py-2 rounded-xl bg-black text-white hover:opacity-80"
+          className="px-4 py-2 rounded-xl bg-black text-white"
         >
           Tambah Member
         </button>
       </div>
-
+      
       {message && (
-        <div className={"p-3 rounded-xl bg-gray-100 text-sm "+text_color}>
+        <div className={`p-3 rounded-xl bg-gray-100 text-sm ${textColor}`}>
           {message}
         </div>
       )}
 
       <div className="space-y-3">
         {members.map((member) => (
-          <div
-            key={member.id}
-            className="border rounded-2xl p-4 shadow-sm bg-white"
-          >
+          <div key={member.id} className="border rounded-2xl p-4 shadow-sm">
             <div className="flex gap-4 flex-wrap">
               <img
                 src={route("members.photo", member.id)}
-                className="w-28 h-28 object-cover rounded-xl"
+                className="w-24 h-24 rounded-xl object-cover"
               />
 
-              <div className="flex-1 min-w-[200px] text-sm space-y-1">
-                <div><span className="font-medium">Nama:</span> {member.full_name}</div>
-                <div><span className="font-medium">Posisi:</span> {member.position.name}</div>
-                <div><span className="font-medium">Dibuat pada:</span> {getLocalTime(member.created_at)}</div>
-                <div><span className="font-medium">Diubah pada:</span> {getLocalTime(member.edited_at)}</div>
+              <div className="flex-1 text-sm">
+                <div className="font-medium">{member.full_name}</div>
+                <div>Dibuat: {getLocalTime(member.created_at)}</div>
+                <div>Diubah: {getLocalTime(member.edited_at)}</div>
+
+                {member.linkedin_link && (
+                  <a
+                    href={member.linkedin_link}
+                    className="text-blue-600 underline"
+                    target="_blank"
+                  >
+                    LinkedIn
+                  </a>
+                )}
               </div>
-              {member.management_detail!=null && (<div className="flex-1 min-w-[200px] text-sm space-y-1">
-                <div>Details:</div>
-                <div><span className="font-medium">LinkedIn: </span><a className="text-blue-500 underline" href={escapeHtml(member.management_detail.linkedin_link)} target="_blank" rel="noopener noreferrer">Click Here</a></div>
-                <div><span className="font-medium">Period:</span> {member.management_detail.period?.title}</div>
-              </div>)}
+
+              <div className="flex-1 min-w-[220px] text-sm space-y-2">
+                <div className="font-medium">Management Details</div>
+
+                {member.management_detail.map((detail) => (
+                  <div
+                    key={detail.id}
+                    className="border rounded-xl p-2 bg-gray-50 text-xs "
+                  >
+                    <div>Posisi: {detail.position.name}</div>
+                    <div>Periode: {detail.period.title}</div>
+                    <div className="flex justify-between w-full px-10 pt-2">
+                      <button
+                        onClick={() => openDetailEdit(member, detail)}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Edit Detail
+                      </button>
+                      <button
+                        onClick={() => destroyDetail(detail.id)}
+                        className="text-red-600"
+                      >
+                        Hapus Detail
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                <button
+                  onClick={() => openDetailCreate(member)}
+                  className="text-green-600 text-sm"
+                >
+                  + Tambah Detail
+                </button>
+              </div>
             </div>
 
             <div className="flex gap-2 mt-3">
-              <button
-                onClick={() => openEdit(member)}
-                className="px-3 py-1 rounded-xl border hover:bg-gray-50"
-              >
-                Edit
-              </button>
+              <button onClick={() => openEdit(member)}>Edit</button>
               <button
                 onClick={() => destroy(member.id)}
-                className="px-3 py-1 rounded-xl border text-red-600 hover:bg-red-50"
+                className="text-red-600"
               >
                 Hapus
               </button>
@@ -191,119 +285,134 @@ export default function MembersPage({ members }: Props) {
         ))}
       </div>
 
+      {/* MEMBER MODAL */}
       {open && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-          <div className="bg-white rounded-2xl p-6 w-[380px] shadow-lg space-y-3">
-            <h3 className="text-lg font-semibold">
-              {mode === "create" ? "Tambah" : "Edit"} Member
-            </h3>
-
-            <form onSubmit={submit} className="space-y-3">
-              <div className="hidden">
-                <input
-                  type="number"
-                  placeholder=""
-                  // @ts-ignore
-                  defaultValue={form.id}
-                  className="w-full border rounded-xl px-3 py-2 text-sm"
-                />
-              </div>
-              <div>
-                <input
-                  placeholder="Full name"
-                  value={form.full_name}
-                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                  className="w-full border rounded-xl px-3 py-2 text-sm"
-                />
-                {errors?.full_name && (
-                  <div className="text-red-500 text-xs mt-1">{errors.full_name}</div>
-                )}
-              </div>
-              
-              <div>
-                <select
-                  value={form.position_id}
-                  onChange={(e) => setForm({ ...form, position_id: e.target.value })}
-                  className="w-full border rounded-xl px-3 py-2 text-sm"
-                >
-                  <option value="">Pilih Position</option>
-                  {positions.map((pos) => (
-                    <option key={pos.id} value={pos.id}>{pos.name}</option>
-                  ))}
-                </select>
-                {errors?.position_id && (
-                  <div className="text-red-500 text-xs mt-1">{errors.position_id}</div>
-                )}
-              </div>
-              
-              <div>
-                <input
-                  type="file"
-                  onChange={(e) => setForm({ ...form, photo: e.target.files ? e.target.files[0] : null })}
-                  className="w-full text-sm"
-                />
-                {errors?.photo && (
-                  <div className="text-red-500 text-xs mt-1">{errors.photo}</div>
-                )}
-              </div>
-
-              <InputLabel htmlFor="is_detail" value="Is Detail" />
-              <Checkbox
-                  name="is_detail"
-                  checked={is_detail_check}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                      setIsDetail(event.target.checked);
-                  }}
-              />
-
-              {is_detail_check && (
-                <>
-                <div>
-                  <input
-                    placeholder="LinkedIn link"
-                    value={form.linkedin_link}
-                    onChange={(e) => setForm({ ...form, linkedin_link: e.target.value })}
-                    className="w-full border rounded-xl px-3 py-2 text-sm"
-                  />
-                  {errors?.linkedin_link && (
-                    <div className="text-red-500 text-xs mt-1">{errors.linkedin_link}</div>
-                  )}
-                </div>
-                <div>
-                  <select
-                    value={form.period_id}
-                    onChange={(e) => setForm({ ...form, period_id: e.target.value })}
-                    className="w-full border rounded-xl px-3 py-2 text-sm"
-                  >
-                    <option value="">Pilih Periode</option>
-                    {periods.map((pos) => (
-                      <option key={pos.id} value={pos.id}>{pos.title}</option>
-                    ))}
-                  </select>
-                  {errors?.period_id && (
-                    <div className="text-red-500 text-xs mt-1">{errors.period_id}</div>
-                  )}
-                </div>
-                </>
+          <form
+            onSubmit={submit}
+            className="bg-white rounded-2xl p-6 space-y-3 w-[360px]"
+          >
+            <InputLabel
+                htmlFor="full_name"
+                value="Nama Lengkap"
+                className="text-xl"
+            />
+            <input
+              value={form.full_name}
+              onChange={(e) =>
+                setForm({ ...form, full_name: e.target.value })
+              }
+              className="w-full border rounded-xl px-3 py-2"
+              placeholder="Full name"
+            />
+            {errors?.full_name && (
+                <div className="text-red-500 text-xs mt-1">{errors.full_name}</div>
+              )}
+            <InputLabel
+                htmlFor="linkedin_link"
+                value="LinkedIn Link"
+                className="text-xl"
+            />
+            <input
+              value={form.linkedin_link}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  linkedin_link: e.target.value,
+                })
+              }
+              className="w-full border rounded-xl px-3 py-2"
+            />
+            {errors?.linkedin_link && (
+                <div className="text-red-500 text-xs mt-1">{errors.linkedin_link}</div>
+              )}
+            <InputLabel
+                htmlFor="photo"
+                value="File Foto"
+                className="text-xl"
+            />
+            <input
+              type="file"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  photo: e.target.files?.[0] ?? null,
+                })
+              }
+            />
+            {errors?.photo && (
+                <div className="text-red-500 text-xs mt-1">{errors.photo}</div>
               )}
 
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="px-3 py-1 rounded-xl border text-sm"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="px-3 py-1 rounded-xl bg-black text-white text-sm hover:opacity-80"
-                >
-                  Simpan
-                </button>
-              </div>
-            </form>
-          </div>
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setOpen(false)}>
+                Batal
+              </button>
+              <button type="submit">Simpan</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* DETAIL MODAL */}
+      {detailOpen && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+          <form
+            onSubmit={submitDetail}
+            className="bg-white rounded-2xl p-6 space-y-3 w-[360px]"
+          >
+            <InputLabel
+                htmlFor="position_id"
+                value="Posisi"
+                className="text-xl"
+            />
+            <select
+              value={detailForm.position_id}
+              onChange={(e) =>
+                setDetailForm({ ...detailForm, position_id: e.target.value })
+              }
+              className="w-full border rounded-xl px-3 py-2"
+            >
+              <option value="">Pilih Position</option>
+              {positions.map((pos) => (
+                <option key={pos.id} value={pos.id}>
+                  {pos.name}
+                </option>
+              ))}
+            </select>
+            {errors?.position_id && (
+                <div className="text-red-500 text-xs mt-1">{errors.position_id}</div>
+              )}
+            <InputLabel
+                htmlFor="period_id"
+                value="Periode"
+                className="text-xl"
+            />
+            <select
+              value={detailForm.period_id}
+              onChange={(e) =>
+                setDetailForm({ ...detailForm, period_id: e.target.value })
+              }
+              className="w-full border rounded-xl px-3 py-2"
+            >
+              <option value="">Pilih Periode</option>
+              {periods.map((per) => (
+                <option key={per.id} value={per.id}>
+                  {per.title}
+                </option>
+              ))}
+            </select>
+            {errors?.period_id && (
+                <div className="text-red-500 text-xs mt-1">{errors.period_id}</div>
+              )}
+
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setDetailOpen(false)}>
+                Batal
+              </button>
+              <button type="submit">Simpan</button>
+            </div>
+          </form>
         </div>
       )}
     </div>
