@@ -2,7 +2,7 @@ import { Link, Head } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 
 export default function News() {
-  // INI DUMMY DATA (Data Palsu pengganti Database)
+  // INI DUMMY DATA
   const dummyNews = [
     {
       id: 1,
@@ -11,7 +11,7 @@ export default function News() {
       date: "12 Februari 2026",
       author: "Admin Infratek",
       excerpt: "Laboratorium Infratek mengadakan pelatihan jaringan komputer dasar untuk mahasiswa semester awal guna mengenalkan konsep routing dan switching...",
-      thumbnail: "/assets/images/gallery/1.jpg" // Kita pinjam foto galeri dulu
+      thumbnail: "/assets/images/gallery/1.jpg"
     },
     {
       id: 2,
@@ -44,87 +44,111 @@ export default function News() {
 
   return (
     <MainLayout>
-      <Head title="Berita - Lab Infratek" />
+      <Head title="Berita & Artikel - Lab Infratek" />
 
-      <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-white">
+      {/* INJEKSI CSS ANIMASI */}
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-card {
+          animation: fadeInUp 0.7s ease-out both;
+        }
+      `}</style>
+
+      <div className="min-h-screen bg-slate-50 font-sans pb-24">
+        
         {/* Header Section */}
-        <section className="relative pt-32 pb-12 px-6 overflow-hidden">
-          <div className="relative max-w-7xl mx-auto text-center animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent">
-              Berita & Artikel
+        <section className="relative pt-32 pb-20 px-6 overflow-hidden bg-white border-b border-slate-100">
+          <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px]"></div>
+          
+          <div className="relative max-w-7xl mx-auto text-center" style={{ animation: 'fadeInUp 0.8s ease-out forwards' }}>
+            <div className="inline-block px-4 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-widest mb-4">
+              Update Terkini
+            </div>
+            <h1 className="text-4xl md:text-6xl font-black mb-6 text-slate-900 tracking-tight">
+              Berita & <span className="text-blue-600">Artikel</span>
             </h1>
-            <p className="text-lg text-gray-600">
-              Informasi terbaru seputar kegiatan Laboratorium Infratek
+            <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
+              Eksplorasi kegiatan, inovasi, dan pengumuman terbaru dari Laboratorium Infrastruktur Teknologi.
             </p>
-            <div className="w-24 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent mx-auto mt-6 shadow-lg shadow-blue-500/50"></div>
           </div>
         </section>
 
         {/* News Grid */}
-        <section className="max-w-7xl mx-auto px-6 pb-24">
+        <section className="max-w-7xl mx-auto px-6 -mt-8 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {dummyNews.map((news, index) => (
               <div 
                 key={news.id} 
-                className="group bg-white rounded-2xl shadow-lg border border-blue-50 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 animate-slide-up"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="animate-card group bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-500 flex flex-col"
+                style={{ animationDelay: `${index * 0.15}s` }}
               >
                 {/* Thumbnail Image */}
-                <div className="relative h-56 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity"></div>
+                <div className="relative h-60 overflow-hidden">
+                  <div className="absolute inset-0 bg-blue-900/10 group-hover:bg-transparent z-10 transition-colors"></div>
                   <img 
                     src={news.thumbnail} 
                     alt={news.title}
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                    onError={(e) => { e.target.src = 'https://placehold.co/600x400/e2e8f0/475569?text=Infratek+News' }}
                   />
-                  {/* Category Badge (Opsional) */}
-                  <span className="absolute top-4 left-4 z-20 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                    Berita
-                  </span>
+                  <div className="absolute bottom-4 left-4 z-20">
+                    <span className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-wider shadow-lg shadow-blue-600/50">
+                      Infratek Info
+                    </span>
+                  </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
-                  <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
-                    <span className="flex items-center gap-1">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <div className="p-8 flex flex-col flex-grow">
+                  <div className="flex items-center gap-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                       {news.date}
                     </span>
-                    <span className="flex items-center gap-1">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                       {news.author}
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-xl font-extrabold text-slate-800 mb-4 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
                     <Link href={`/news/${news.slug}`}>
                       {news.title}
                     </Link>
                   </h3>
                   
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                  <p className="text-slate-500 text-sm mb-6 line-clamp-3 leading-relaxed">
                     {news.excerpt}
                   </p>
 
-                  <Link 
-                    href={`/news/${news.slug}`}
-                    className="inline-flex items-center gap-2 text-blue-600 font-semibold text-sm group-hover:gap-3 transition-all"
-                  >
-                    Baca Selengkapnya
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                  </Link>
+                  <div className="mt-auto pt-6 border-t border-slate-50">
+                    <Link 
+                      href={`/news/${news.slug}`}
+                      className="inline-flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-widest hover:text-indigo-600 transition-all group/link"
+                    >
+                      Baca Selengkapnya
+                      <svg className="w-4 h-4 transform transition-transform group-hover/link:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Pagination Dummy */}
-          <div className="flex justify-center mt-12 gap-2">
-            <button className="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">Prev</button>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg shadow-blue-500/30">1</button>
-            <button className="px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50">2</button>
-            <button className="px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50">3</button>
-            <button className="px-4 py-2 bg-white text-blue-600 border border-blue-100 rounded-lg hover:bg-blue-50">Next</button>
+          {/* Pagination Modern */}
+          <div className="flex justify-center mt-16 items-center gap-2" style={{ animation: 'fadeInUp 0.8s ease-out 1s both' }}>
+            <button className="w-10 h-10 flex items-center justify-center text-slate-400 rounded-xl hover:bg-white hover:text-blue-600 transition-all border border-transparent hover:border-slate-100">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <button className="w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/40">1</button>
+            <button className="w-10 h-10 flex items-center justify-center bg-white text-slate-600 rounded-xl font-bold border border-slate-100 hover:border-blue-400 hover:text-blue-600 transition-all">2</button>
+            <button className="w-10 h-10 flex items-center justify-center bg-white text-slate-600 rounded-xl font-bold border border-slate-100 hover:border-blue-400 hover:text-blue-600 transition-all">3</button>
+            <button className="w-10 h-10 flex items-center justify-center text-slate-600 rounded-xl hover:bg-white hover:text-blue-600 transition-all border border-transparent hover:border-slate-100">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
           </div>
         </section>
       </div>
