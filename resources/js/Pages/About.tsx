@@ -34,7 +34,7 @@ const InstagramIcon = () => (
     </svg>
 );
 
-const ProfileCard = ({ person, isHead = false, isBph = false, isLecturer = false, delay = "0s" }: { person: Member, isHead?: boolean, isBph?: boolean, isLecturer?: boolean, delay?: string }) => {
+const ProfileCard = ({ person, isHead = false, isBph = false, isLecturer = false, delay = "0s", description="" }: { person: Member, isHead?: boolean, isBph?: boolean, isLecturer?: boolean, delay?: string, description?: string}) => {
     
     // Inline style untuk trigger animasi fade-in-up per komponen
     const animStyle = {
@@ -53,7 +53,7 @@ const ProfileCard = ({ person, isHead = false, isBph = false, isLecturer = false
                 />
                 <h4 className="font-extrabold text-xl text-slate-800 text-center mb-1">{person.full_name}</h4>
                 <span className="bg-blue-100 text-blue-700 text-xs font-bold px-4 py-1.5 rounded-full mb-4">{person.position_name}</span>
-                {/* <p className="text-sm text-slate-600 text-center leading-relaxed mb-6 flex-grow">{person.description}</p> */}
+                <p className="text-sm text-slate-600 text-center leading-relaxed mb-6 flex-grow">{description}</p>
                 
                 {person.linkedin_link && (
                     <a href={person.linkedin_link} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-blue-600 transition-colors mt-auto group/icon">
@@ -74,8 +74,7 @@ const ProfileCard = ({ person, isHead = false, isBph = false, isLecturer = false
         <div style={animStyle} className={`bg-white rounded-2xl shadow-md border border-slate-100 flex flex-col items-center p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-blue-500/10 group ${isHead ? 'ring-1 ring-blue-300' : ''}`}>
             <div className="relative mb-4">
                 <img
-                    src={person.full_name}
-                    // src={person.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(person.name)}&background=random`}
+                    src={route('members.photo', person.id)}
                     alt={person.full_name}
                     className={`rounded-full object-cover bg-gray-50 transition-transform duration-500 group-hover:scale-110 ${isBph ? 'w-24 h-24 border-4 border-blue-50 shadow-sm' : isHead ? 'w-20 h-20 border-2 border-blue-200 shadow-sm' : 'w-16 h-16 border-2 border-slate-100'}`}
                 />
@@ -116,7 +115,11 @@ function renderKepalaPranta(members: Member[]){
                     <div key={lecturer.id} className="w-full md:w-1/2 flex">
                         <div className="w-full">
                             {/* Delay berurutan berdasarkan index */}
-                            <ProfileCard person={lecturer} isLecturer={true} delay={`${0.7 + (idx * 0.2)}s`} />
+                            <ProfileCard person={lecturer} isLecturer={true} delay={`${0.7 + (idx * 0.2)}s`} description={
+                                idx==0 ?
+                                "Mengawasi, mengarahkan, dan bertanggung jawab penuh atas seluruh kegiatan akademik, riset, serta pengembangan infrastruktur di dalam lingkungan laboratorium."
+                                : "Bertanggung jawab atas pengelolaan teknis harian, pemeliharaan infrastruktur jaringan, serta memastikan seluruh perangkat keras dan lunak laboratorium berfungsi optimal."
+                            }/>
                         </div>
                     </div>
                 ))}
