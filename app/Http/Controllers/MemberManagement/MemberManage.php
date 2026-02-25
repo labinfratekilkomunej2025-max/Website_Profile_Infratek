@@ -96,7 +96,11 @@ class MemberManage extends Controller
         return $file_path;
     }
     public function photo(Member $member){
-        if ($member->photo_path!=null && Storage::disk('member_photos')->exists($member->photo_path)) return Storage::disk('member_photos')->response($member->photo_path);
-        else return ;
+        if ($member->photo_path!=null && Storage::disk('member_photos')->exists($member->photo_path)) {
+            return Storage::disk('member_photos')->response($member->photo_path);
+        }else {
+            $name = $member->full_name;
+            return redirect("https://ui-avatars.com/api/?name=$name&background=random");
+        }
     }
 }
