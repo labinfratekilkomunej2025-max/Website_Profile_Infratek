@@ -1,7 +1,6 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\GalleryController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -60,8 +59,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
-
+Route::get('/test/gallery', function () {
+    return view('test.gallery');
+})->name('test.gallery');
 Route::get('/users', [UserController::class, 'get_all_editor'])->name('get_all_editor');
  
 Route::get('/managements/get-all', [ManagementManage::class, 'get_all_management_member'])->name('get_all_managements');
