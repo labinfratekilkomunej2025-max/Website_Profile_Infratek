@@ -10,6 +10,7 @@ class Member extends Model
     protected $fillable = [
         'full_name',
         'linkedin_link',
+        'instagram_link',
         'photo_path',
         'created_at',
         'edited_at',

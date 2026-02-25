@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Member;
 use App\Models\Period;
-use App\Models\ManagementDetail;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 
@@ -13,36 +12,59 @@ class GuestController extends Controller
 {
     function Home(Request $request)
     {
-        return Inertia::render('Home', [
-            'CurrentPath'=>$request->url(),
-        ]);
+        return Inertia::render('Home');
     }
     function Gallery(Request $request){
-        return Inertia::render('gallery/page', [
-            'CurrentPath'=>$request->url(),
-        ]);
+        return Inertia::render('gallery/page');
     }
     function Contact(Request $request){
-        return Inertia::render('contact/page', [
-            'CurrentPath'=>$request->url(),
+        return Inertia::render('contact/page');
+    }
+    function About()
+    {
+        $periods = Period::orderBy('title')->get();
+        $members = Member::select(['members.id',
+                'members.full_name',
+                'linkedin_link',
+                'instagram_link',
+                'd.name as division_name',
+                'p.name as position_name'
+            ])
+            ->join('management_details as md', 'md.member_id', '=', 'members.id')
+            ->join('positions as p', 'p.id', '=', 'md.position_id')
+            ->join('divisions as d', 'd.id', '=', 'p.division_id')
+            ->where('md.period_id', $periods[count($periods) - 1]->id)
+            ->orderBy('d.order')
+            ->orderBy('p.order')
+            ->get();
+        $grouped = $members->groupBy(function ($item) {
+            return $item->division_name;
+        });
+        
+        return Inertia::render('About', [
+            'periods'=>$periods,
+            'members_page'=>$grouped,
         ]);
     }
     function GetMembers(Period $period)
     {
-        $details = ManagementDetail::with([
-            'member',
-            'position.division',
-        ])
-        ->join('positions', 'positions.id', '=', 'management_details.position_id')
-        ->join('divisions', 'divisions.id', '=', 'positions.division_id')
-        ->where('period_id', $period->id)
-        ->orderBy('divisions.order')    
-        ->orderBy('positions.order')   
-        ->select('management_details.*')
-        ->get();
-        $grouped = $details->groupBy(function ($item) {
-            return $item->position->division?->name;
+        $members = Member::select(['members.id',
+                'members.full_name',
+                'linkedin_link',
+                'instagram_link',
+                'd.name as division_name',
+                'p.name as position_name'
+            ])
+            ->join('management_details as md', 'md.member_id', '=', 'members.id')
+            ->join('positions as p', 'p.id', '=', 'md.position_id')
+            ->join('divisions as d', 'd.id', '=', 'p.division_id')
+            ->where('md.period_id', $period->id)
+            ->orderBy('d.order')
+            ->orderBy('p.order')
+            ->get();
+        $grouped = $members->groupBy(function ($item) {
+            return $item->division_name;
         });
-        return response()->json(['result' => $grouped]);
+        return response()->json($grouped);
     }
 }

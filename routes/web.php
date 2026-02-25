@@ -19,7 +19,8 @@ Route::middleware('guest')->group(function () {
     Route::get('/', [GuestController::class, 'Home'])->name('home');
     Route::get('/gallery', [GuestController::class, 'Gallery'])->name('gallery');
     Route::get('/contact', [GuestController::class, 'Contact'])->name('contact');
-    Route::get('/coba/{period}', [GuestController::class, 'GetMembers'])->name('coba');
+    Route::get('/about/get-members/{period}', [GuestController::class, 'GetMembers'])->name('get-members');
+    Route::get('/about', [GuestController::class, 'About'])->name('about');
 });
 
 // For routes that can only be accessed by Editor or Admin
@@ -41,9 +42,7 @@ Route::get('/news/{slug}', function ($slug) {
     return Inertia::render('NewsDetail', ['slug' => $slug]);
 })->name('news.detail');
 
-Route::get('/about', function () {
-    return Inertia::render('About');
-})->name('about');
+
     
 // Route::post('/users/destroy', [UserController::class, 'delete_user'])->name('user.delete'); // testing
 // Route::get('/users/delete', function(){
@@ -63,9 +62,6 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-// Route::get('/secret', function(){
-//     return Storage::disk('local')->response("secret.txt");
-// });
 Route::get('/users', [UserController::class, 'get_all_editor'])->name('get_all_editor');
  
 Route::get('/managements/get-all', [ManagementManage::class, 'get_all_management_member'])->name('get_all_managements');

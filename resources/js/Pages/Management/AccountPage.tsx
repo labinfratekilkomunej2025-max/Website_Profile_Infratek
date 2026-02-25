@@ -37,7 +37,6 @@ export default function AccountsPage({ accounts }: Props) {
     password_confirmation: "",
   });
 
-  // ✅ Flash message handler (SAMA PERSIS)
   useEffect(() => {
     if (flash?.success) {
       setMessage(`Success: ${props.flash.success}`);
@@ -82,11 +81,11 @@ export default function AccountsPage({ accounts }: Props) {
     if (form.is_admin && !confirm("The is admin column is checked, are you sure want to proceed?")) return;
     if (mode === "create") {
       router.post(route("users.store"), form, {
-        onSuccess: () => {setOpen(false); console.log('success');},
+        onSuccess: () => {setOpen(false);},
       });
     } else {
       router.put(route("users.update"), form, {
-        onSuccess: () => {setOpen(false); console.log('success');},
+        onSuccess: () => {setOpen(false);},
       });
     }
   };

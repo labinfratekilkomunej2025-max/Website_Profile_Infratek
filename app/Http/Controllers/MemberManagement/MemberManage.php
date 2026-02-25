@@ -33,10 +33,12 @@ class MemberManage extends Controller
             'is_photo_update' => ['required', 'boolean'],
             'photo' => ['required_if:is_photo_update,1', 'file', 'mimes:jpeg,png', 'max:5000'], 
             'linkedin_link' => ['nullable', 'string', 'max:255'],
+            'instagram_link' => ['nullable', 'string', 'max:255'],
         ]);
         $member = Member::create([
             'full_name' => $validated['full_name'],
             'linkedin_link' => $validated['linkedin_link'],
+            'instagram_link' => $validated['instagram_link'],
             'photo_path' => '',
             'created_at' => Carbon::now(),
             'edited_at' => Carbon::now(),
@@ -56,6 +58,7 @@ class MemberManage extends Controller
             'is_photo_update' => ['required', 'boolean'],
             'photo' => ['required_if:is_photo_update,1', 'file', 'mimes:jpeg,png', 'max:5000'], 
             'linkedin_link' => ['required_if:is_detail,1', 'nullable', 'string', 'max:255'],
+            'instagram_link' => ['nullable', 'string', 'max:255'],
         ]);
         $member = Member::find($validated['id']);
         if ($member->full_name!=$validated['full_name']) {
@@ -71,6 +74,7 @@ class MemberManage extends Controller
             }
         }
         $member->linkedin_link = $validated['linkedin_link'];
+        $member->instagram_link = $validated['instagram_link'];
         if ($validated['is_photo_update']){
             $result = $this::store_photo($validated['photo'], $member->photo_path);
             $member->photo_path = $result;
