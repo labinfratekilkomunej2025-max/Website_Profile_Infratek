@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Member;
 use App\Models\Period;
+use App\Models\Gallery;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 
@@ -15,7 +16,16 @@ class GuestController extends Controller
         return Inertia::render('Home');
     }
     function Gallery(Request $request){
-        return Inertia::render('gallery/page');
+        $galleries = Gallery::select([
+                'id',
+                'title',
+                'description',
+            ])->where('is_public', true)
+            ->orderByDesc('created_at')
+            ->paginate(9);
+        return Inertia::render('gallery/page', [
+            'galleries_payload' => $galleries,
+        ]);
     }
     function Contact(Request $request){
         return Inertia::render('contact/page');

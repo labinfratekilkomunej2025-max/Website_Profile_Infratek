@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('image_path')->nullable();   // diisi jika type = 'image'
             $table->string('alt_text');                 // wajib diisi
             $table->integer('order');
-            $table->foreignId('created_by_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('created_by_id')->constrained('users')->onDelete('set null');
         });
     }
 

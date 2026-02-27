@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             MemberSeeder::class,
             DivisionSeeder::class,
             ManagementDetailSeeder::class,
+            GallerySeeder::class,
         ]);
         // User::factory()->create([
         //     'name' => 'Test User',

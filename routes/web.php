@@ -13,6 +13,24 @@ use App\Http\Controllers\MemberManagement\PeriodController;
 use App\Http\Controllers\MemberManagement\DivisionController;
 use App\Http\Controllers\GuestController;
 
+Route::prefix('galleries')->name('galleries.')->group(function () {
+    Route::get('/', [GalleryController::class, 'index'])->name('index');
+    Route::get('/{id}', [GalleryController::class, 'show'])->name('show');
+    Route::get('/image/tumbnail/{gallery}', [GalleryController::class, 'image_tumbnail'])->name('image.tumbnail');
+    Route::get('/{gallery}/image/{image}', [GalleryController::class, 'image'])->name('image');
+    Route::get('/{gallery}/images', [GalleryController::class, 'GetAvailableImage'])->name('images');
+});
+
+// Protected Routes - hanya yang sudah login
+Route::middleware(['auth'])->prefix('galleries')->name('galleries.')->group(function () {
+    Route::post('/store', [GalleryController::class, 'store'])->name('store');
+    Route::put('/{id}', [GalleryController::class, 'update'])->name('update');
+    Route::delete('/{id}', [GalleryController::class, 'destroy'])->name('destroy');
+    Route::patch('/{id}/toggle-publish', [GalleryController::class, 'togglePublish'])->name('toggle-publish');
+    Route::post('/{id}/images', [GalleryController::class, 'uploadImages'])->name('upload-images');
+    Route::delete('/{galleryId}/images/{imageId}', [GalleryController::class, 'deleteImage'])->name('delete-image');
+});
+
 // For routes that can be accessed for anyone
 Route::middleware('guest')->group(function () {
     Route::get('/', [GuestController::class, 'Home'])->name('home');
@@ -40,13 +58,6 @@ Route::get('/news/{slug}', function ($slug) {
     // Kita kirim $slug ke komponen React agar bisa dipakai (nanti buat fetch data)
     return Inertia::render('NewsDetail', ['slug' => $slug]);
 })->name('news.detail');
-
-
-    
-// Route::post('/users/destroy', [UserController::class, 'delete_user'])->name('user.delete'); // testing
-// Route::get('/users/delete', function(){
-//     return Inertia::render('Nyoba');
-// })->name('user.delete_page'); // testing
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -104,7 +115,4 @@ Route::name('management-details.')->prefix('management-details')->group(function
     Route::put('update/{management_detail}', [ManagementManage::class, 'detail_update'])->name('update');
     Route::delete('destroy/{management_detail}', [ManagementManage::class, 'detail_destroy'])->name('destroy');
 });
-
-    // $path = $request->file('avatar')->store('/', 'private_gallery_images');
-    // $path = $request->file('avatar')->store('/', 'private_news_images');
-    // $path = $request->file('avatar')->store('/', 'member_photos');
+require __DIR__.'/auth.php';

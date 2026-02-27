@@ -11,7 +11,7 @@ Route::prefix('galleries')->group(function () {
 
 // Protected - hanya yang sudah login
 Route::middleware(['auth'])->prefix('galleries')->group(function () {
-    Route::post('/', [GalleryController::class, 'store']);
+    Route::post('/store', [GalleryController::class, 'store']);
     Route::put('/{id}', [GalleryController::class, 'update']);
     Route::delete('/{id}', [GalleryController::class, 'destroy']);
     Route::patch('/{id}/toggle-publish', [GalleryController::class, 'togglePublish']);

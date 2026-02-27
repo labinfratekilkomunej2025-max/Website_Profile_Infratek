@@ -49,6 +49,7 @@ const ProfileCard = ({ person, isHead = false, isBph = false, isLecturer = false
                 <img
                     src={route('members.photo', person.id)}
                     alt={person.full_name}
+                    loading="lazy"
                     className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg mb-5 bg-gray-50 z-10 transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-3"
                 />
                 <h4 className="font-extrabold text-xl text-slate-800 text-center mb-1">{person.full_name}</h4>
@@ -76,6 +77,7 @@ const ProfileCard = ({ person, isHead = false, isBph = false, isLecturer = false
                 <img
                     src={route('members.photo', person.id)}
                     alt={person.full_name}
+                    loading="lazy"
                     className={`rounded-full object-cover bg-gray-50 transition-transform duration-500 group-hover:scale-110 ${isBph ? 'w-24 h-24 border-4 border-blue-50 shadow-sm' : isHead ? 'w-20 h-20 border-2 border-blue-200 shadow-sm' : 'w-16 h-16 border-2 border-slate-100'}`}
                 />
                 {isHead && (
@@ -139,16 +141,16 @@ const renderBPH = (members: Member[]) => {
             <div className="mb-24 relative">
                 <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-10">
                     {/* Bendahara (Kiri) */}
-                    {len>=1 && (<div className="order-2 md:order-1 w-full md:w-64 z-10">
+                    {len>=2 ? (<div className="order-2 md:order-1 w-full md:w-64 z-10">
                         <ProfileCard person={members[1]} isBph={true} delay="1.2s" />
-                    </div>)}
+                    </div>):(<span className="order-2 md:order-1 w-full md:w-64 z-10"></span>)}
                     
                     {/* Ketua (Tengah) - Desain menonjol */}
                     <div className="order-1 md:order-2 w-full md:w-80 transform md:-translate-y-8 z-20" style={{ animation: 'fadeInUp 0.8s ease-out 1.1s both' }}>
                         <div className="bg-gradient-to-b from-white to-slate-50 rounded-3xl shadow-2xl border-t-4 border-yellow-400 flex flex-col items-center p-8 transition-all duration-500 hover:-translate-y-3 hover:shadow-yellow-400/20 group">
                             <div className="relative mb-5">
                                 <div className="absolute inset-0 bg-yellow-400 rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
-                                <img src={route('members.photo', members[0].id)} alt="Ketua" className="relative w-32 h-32 rounded-full border-4 border-white shadow-md object-cover transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3" />
+                                <img src={route('members.photo', members[0].id)} alt="Ketua" loading="lazy" className="relative w-32 h-32 rounded-full border-4 border-white shadow-md object-cover transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3" />
                             </div>
                             <h3 className="font-extrabold text-xl text-slate-800 text-center mb-1 group-hover:text-yellow-600 transition-colors">{members[0].full_name}</h3>
                             <span className="bg-yellow-100 text-yellow-800 text-xs font-bold px-4 py-1.5 rounded-full mt-2 mb-4 text-center leading-tight shadow-sm">{members[0].position_name}</span>
@@ -168,9 +170,9 @@ const renderBPH = (members: Member[]) => {
                     </div>
 
                     {/* Sekretaris (Kanan) */}
-                    {len>=2 && (<div className="order-3 w-full md:w-64 z-10">
+                    {len>=3 ? (<div className="order-3 w-full md:w-64 z-10">
                         <ProfileCard person={members[2]} isBph={true} delay="1.3s" />
-                    </div>)}
+                    </div>):(<span className="order-3 w-full md:w-64 z-10"></span>)}
                     
                 </div>
             </div>
@@ -280,7 +282,7 @@ export default function About(
             <select
                 value={periodId}
                 onChange={(e) =>
-                    { console.log("Fire")
+                    { 
                         const num = Number(e.target.value);
                         setPeriodId(num);
                         changeMembers(num);

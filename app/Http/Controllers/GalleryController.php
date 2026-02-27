@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class GalleryController extends Controller
 {
@@ -420,5 +421,35 @@ class GalleryController extends Controller
         }
         
         return null;
+    }
+
+    public function image_tumbnail(Gallery $gallery)
+    {
+        $images = $gallery->images;
+        if (count($images)==0){
+            return response()->json([
+                'error' => 'There is No Image on This Gallery'
+            ]);
+        }
+        $image_path = $images[0]->image_path;
+        if (!Storage::disk('private_gallery_images')->exists($image_path)){
+            return response()->json([
+                'error' => 'Error, File Does Not Exist'
+            ]);
+        } 
+        return Storage::disk('private_gallery_images')->response($image_path);
+    }
+    public function GetAvailableImage(Gallery $gallery)
+    {
+        $images = $gallery->images()
+            ->select('id')
+            ->get()
+            ->values();
+        if (count($images)==0){
+            return response()->json([
+                'error' => 'There is No Image on This Gallery'
+            ]);
+        }
+        return response()->json($images);
     }
 }

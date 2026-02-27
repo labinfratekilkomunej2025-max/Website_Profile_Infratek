@@ -1,59 +1,212 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
+import axios from 'axios';
 
-interface GalleryItem {
+type Gallery = {
     id: number;
     title: string;
     description: string;
-    image_url: string;
-    is_public: number;
 }
 
-export default function Gallery() {
-    // --- DATA DUMMY ---
-    const dummyGalleries: GalleryItem[] = [
-        { id: 1, title: "Kegiatan Pelatihan", description: "Dokumentasi kegiatan pelatihan jarkom", image_url: "/assets/images/gallery/1.jpg", is_public: 1 },
-        { id: 2, title: "Kunjungan Industri", description: "Kunjungan ke Data Center", image_url: "/assets/images/gallery/2.jpg", is_public: 1 },
-        { id: 3, title: "Rapat Kerja", description: "Rapat kerja pengurus lab", image_url: "/assets/images/gallery/3.jpg", is_public: 1 },
-        { id: 4, title: "Dokumentasi Lab", description: "Suasana praktikum", image_url: "/assets/images/gallery/4.jpg", is_public: 1 },
-        { id: 5, title: "Internal Meeting", description: "Rapat internal (Private)", image_url: "/assets/images/gallery/5.jpg", is_public: 0 },
-        { id: 6, title: "Workshop", description: "Workshop Mikrotik", image_url: "/assets/images/gallery/6.jpg", is_public: 1 },
-        { id: 7, title: "Seminar Nasional", description: "Seminar teknologi", image_url: "/assets/images/gallery/7.jpg", is_public: 1 },
-        { id: 8, title: "Lomba Jarkom", description: "Lomba jaringan antar mahasiswa", image_url: "/assets/images/gallery/8.jpg", is_public: 1 },
-        { id: 9, title: "Makrab", description: "Malam keakraban anggota", image_url: "/assets/images/gallery/9.jpg", is_public: 1 },
-        { id: 10, title: "Foto Bersama", description: "Foto keluarga besar lab", image_url: "/assets/images/gallery/10.jpg", is_public: 1 },
-        { id: 11, title: "Arsip Lama", description: "Dokumen lama (Private)", image_url: "/assets/images/gallery/11.jpg", is_public: 0 },
-        { id: 12, title: "Kegiatan Harian", description: "Kegiatan sehari-hari di lab", image_url: "/assets/images/gallery/12.jpg", is_public: 1 },
-        { id: 13, title: "Inventaris", description: "Pengecekan alat", image_url: "/assets/images/gallery/13.jpg", is_public: 1 },
-    ];
+type Image = {
+    id: number|null,
+}
 
-    const publicGalleries = dummyGalleries.filter(item => item.is_public === 1);
+type Props = {
+    galleries_payload: GalleryPayload;
+}
 
-    // --- PAGINATION ---
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 9;
-    const totalPages = Math.ceil(publicGalleries.length / itemsPerPage);
-    const currentItems = publicGalleries.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+type Link = {
+    url: string|null;
+    label: string;
+    page: string | null;
+    active: boolean;
+}
 
+type GalleryPayload = {
+    data: Gallery[];
+    current_page: number;
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: Link[];
+    next_page_url: string|null;
+    path: string;
+    per_page: number;
+    prev_page_url: string|null;
+    to: number;
+    total: number;
+}
+
+export default function Gallery(
+        {galleries_payload} : Props
+    ) {
+    var galleries = galleries_payload.data;
+
+    const currentPage = galleries_payload.current_page;
+    const lastPage = galleries_payload.last_page;
+
+    const MAX_VISIBLE = 4;
+
+    let start = Math.max(currentPage - 1, 1);
+    let end = start + MAX_VISIBLE - 1;
+
+    if (end > lastPage) {
+        end = lastPage;
+        start = Math.max(end - MAX_VISIBLE + 1, 1);
+    }
+
+    const visiblePages = [];
+    for (let i = start; i <= end; i++) {
+        visiblePages.push(i);
+    }
+    const [imagesId, setImagesId] = useState<Image[]>([]);
+    const [imageIdIndex, setImageIdIndex] = useState<number>(0);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [direction, setDirection] = useState<'next' | 'prev'>('next');
+
+    useEffect(()=>{
+        if (imageIdIndex==undefined){return}
+        console.log("DATA: ", imageIdIndex);
+    })
+    const changeImage = async (id: number) => {
+        try {
+            const res = await axios.get(route("galleries.images", id));
+            setImagesId(res.data);
+            setImageIdIndex(0)
+            setIsOpen(true);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+    const renderImageItem = (imgIndex: number)=>{
+        const gallery = galleries?.[lightboxIndex];
+        const image = imagesId?.[imgIndex!];
+
+        if (!gallery || !image) return null;
+        return (
+            <img
+                key={image.id}
+                src={route('galleries.image', {
+                    gallery: gallery.id,
+                    image: image.id
+                })}
+                alt={gallery.title}
+                loading="lazy"
+                className={`
+                    max-h-[75vh] w-auto rounded-3xl
+                    shadow-[0_0_50px_-12px_rgba(59,130,246,0.5)]
+                    object-contain
+                    transition-all duration-250 ease-in-out
+                    ${isAnimating
+                        ? direction === 'next'
+                            ? 'translate-x-10 opacity-0'
+                            : '-translate-x-10 opacity-0'
+                        : 'translate-x-0 opacity-100'
+                    }
+                `}
+            />
+        );
+    }
     // --- LIGHTBOX ---
-    const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-    const isOpen = lightboxIndex !== null;
+    const [lightboxIndex, setLightboxIndex] = useState<number>(0);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+
 
     const openLightbox = (itemId: number) => {
-        const index = publicGalleries.findIndex(img => img.id === itemId);
+        changeImage(itemId);
+        const index = galleries.findIndex(img => img.id === itemId);
         setLightboxIndex(index);
     };
+    function RenderGalleryItem(galleries: Gallery[]){
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {galleries.map((item, index) => (
+                    <div
+                        key={item.id}
+                        className="animate-gallery-item group relative"
+                        style={{ animationDelay: `${index * 100}ms` }}
+                        onClick={() => openLightbox(item.id)}
+                    >
+                        {/* Glowing Background Blur */}
+                        <div className="absolute inset-0 bg-blue-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-    const closeLightbox = () => setLightboxIndex(null);
+                        <div className="relative bg-white rounded-[2rem] p-3 shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-2 cursor-pointer">
+                            <div className="relative aspect-[4/3] rounded-[1.5rem] overflow-hidden bg-slate-100">
+                                <img
+                                    src={route('galleries.image.tumbnail', item.id)}
+                                    alt={item.title}
+                                    loading="lazy"
+                                    className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
+                                    onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/e2e8f0/1e293b?text=Infratek+Documentation' }}
+                                />
+                                
+                                {/* Overlay Neon Corners */}
+                                <div className="absolute inset-4 border-2 border-white/0 group-hover:border-white/20 transition-all duration-500 rounded-xl"></div>
+                                <div className="absolute top-6 left-6 w-8 h-8 border-t-2 border-l-2 border-white/0 group-hover:border-white/80 transition-all duration-500"></div>
+                                <div className="absolute bottom-6 right-6 w-8 h-8 border-b-2 border-r-2 border-white/0 group-hover:border-white/80 transition-all duration-500"></div>
 
-    const nextImage = useCallback(() => {
-        if (lightboxIndex !== null) setLightboxIndex((prev) => (prev! + 1) % publicGalleries.length);
-    }, [lightboxIndex, publicGalleries.length]);
+                                {/* Hover Badge */}
+                                <div className="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                    <span className="bg-white text-blue-600 px-6 py-2 rounded-full font-black text-xs uppercase tracking-tighter shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                        See Images
+                                    </span>
+                                </div>
+                            </div>
 
-    const prevImage = useCallback(() => {
-        if (lightboxIndex !== null) setLightboxIndex((prev) => (prev! - 1 + publicGalleries.length) % publicGalleries.length);
-    }, [lightboxIndex, publicGalleries.length]);
+                            <div className="px-4 py-6">
+                                <h3 className="text-lg font-black text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">{item.title}</h3>
+                                <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed">{item.description}</p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    const visit = (url: string | null) => {
+        if (!url) return;
+
+        router.get(url, {}, {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['galleries_payload'],
+        });
+    };
+
+    const closeLightbox = () => setIsOpen(false);
+
+    const nextImage = () => {
+        if (isAnimating || !imagesId.length) return;
+
+        setDirection('next');
+        setIsAnimating(true);
+
+        setImageIdIndex(prev =>
+            prev === null ? 0 : (prev + 1) % imagesId.length
+        );
+
+        setTimeout(() => {
+            setIsAnimating(false);
+        }, 1000); // 1 detik lock
+    };
+
+    const prevImage = () => {
+        if (isAnimating || !imagesId.length) return;
+
+        setDirection('prev');
+        setIsAnimating(true);
+
+        setImageIdIndex(prev =>
+            prev === null ? 0 : (prev - 1 + imagesId.length) % imagesId.length
+        );
+
+        setTimeout(() => {
+            setIsAnimating(false);
+        }, 1000);
+    };
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -103,94 +256,92 @@ export default function Gallery() {
 
                 {/* Gallery Grid */}
                 <section className="max-w-7xl mx-auto px-6 mb-20">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {currentItems.map((item, index) => (
-                            <div
-                                key={item.id}
-                                className="animate-gallery-item group relative"
-                                style={{ animationDelay: `${index * 100}ms` }}
-                                onClick={() => openLightbox(item.id)}
-                            >
-                                {/* Glowing Background Blur */}
-                                <div className="absolute inset-0 bg-blue-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                                <div className="relative bg-white rounded-[2rem] p-3 shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-2 cursor-pointer">
-                                    <div className="relative aspect-[4/3] rounded-[1.5rem] overflow-hidden bg-slate-100">
-                                        <img
-                                            src={item.image_url}
-                                            alt={item.title}
-                                            className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
-                                            onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/e2e8f0/1e293b?text=Infratek+Documentation' }}
-                                        />
-                                        
-                                        {/* Overlay Neon Corners */}
-                                        <div className="absolute inset-4 border-2 border-white/0 group-hover:border-white/20 transition-all duration-500 rounded-xl"></div>
-                                        <div className="absolute top-6 left-6 w-8 h-8 border-t-2 border-l-2 border-white/0 group-hover:border-white/80 transition-all duration-500"></div>
-                                        <div className="absolute bottom-6 right-6 w-8 h-8 border-b-2 border-r-2 border-white/0 group-hover:border-white/80 transition-all duration-500"></div>
-
-                                        {/* Hover Badge */}
-                                        <div className="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                            <span className="bg-white text-blue-600 px-6 py-2 rounded-full font-black text-xs uppercase tracking-tighter shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                                Enlarge Image
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="px-4 py-6">
-                                        <h3 className="text-lg font-black text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">{item.title}</h3>
-                                        <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed">{item.description}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Pagination Modern */}
+                    {RenderGalleryItem(galleries)}
                     <div className="flex flex-col items-center mt-20 gap-6">
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-300 ${
-                                    currentPage === 1 ? "bg-slate-100 text-slate-300" : "bg-white text-blue-600 shadow-md hover:bg-blue-600 hover:text-white border border-slate-100"
-                                }`}
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
-                            </button>
 
-                            <div className="flex gap-2">
-                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                    <button
-                                        key={page}
-                                        onClick={() => setCurrentPage(page)}
-                                        className={`relative w-12 h-12 rounded-2xl font-black text-sm transition-all duration-300 ${
-                                            currentPage === page
-                                                ? "bg-blue-600 text-white shadow-lg shadow-blue-500/40 scale-110"
-                                                : "bg-white text-slate-400 hover:text-blue-600 border border-slate-100 hover:border-blue-200 shadow-sm"
-                                        }`}
-                                    >
-                                        {page}
-                                        {currentPage === page && (
-                                            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1 bg-white/40 rounded-full"></span>
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
+                    <div className="flex items-center gap-2">
 
+                        {/* FIRST */}
+                        <button
+                            onClick={() => visit(galleries_payload.first_page_url)}
+                            disabled={currentPage === 1}
+                            className="px-4 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
+                        >
+                            First
+                        </button>
+
+                        {/* PREV */}
+                        <button
+                            onClick={() => visit(galleries_payload.prev_page_url)}
+                            disabled={!galleries_payload.prev_page_url}
+                            className="w-12 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
+                        >
+                            ‹
+                        </button>
+
+                        {/* PAGE NUMBERS (MAX 4) */}
+                        {start > 1 && (
+                            <>
+                                <button
+                                    onClick={() => visit(`${galleries_payload.path}?page=1`)}
+                                    className="w-12 h-12 rounded-2xl bg-white border shadow-sm"
+                                >
+                                    1
+                                </button>
+                                {start > 2 && <span className="px-2">…</span>}
+                            </>
+                        )}
+
+                        {visiblePages.map(page => (
                             <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-300 ${
-                                    currentPage === totalPages ? "bg-slate-100 text-slate-300" : "bg-white text-blue-600 shadow-md hover:bg-blue-600 hover:text-white border border-slate-100"
-                                }`}
+                                key={page}
+                                onClick={() => visit(`${galleries_payload.path}?page=${page}`)}
+                                className={`w-12 h-12 rounded-2xl font-black text-sm transition-all
+                                    ${page === currentPage
+                                        ? "bg-blue-600 text-white shadow-lg scale-110"
+                                        : "bg-white text-slate-400 border shadow-sm hover:text-blue-600"
+                                    }`}
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
+                                {page}
                             </button>
-                        </div>
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                            Page {currentPage} of {totalPages}
-                        </span>
+                        ))}
+
+                        {end < lastPage && (
+                            <>
+                                {end < lastPage - 1 && <span className="px-2">…</span>}
+                                <button
+                                    onClick={() => visit(`${galleries_payload.path}?page=${lastPage}`)}
+                                    className="w-12 h-12 rounded-2xl bg-white border shadow-sm"
+                                >
+                                    {lastPage}
+                                </button>
+                            </>
+                        )}
+
+                        {/* NEXT */}
+                        <button
+                            onClick={() => visit(galleries_payload.next_page_url)}
+                            disabled={!galleries_payload.next_page_url}
+                            className="w-12 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
+                        >
+                            ›
+                        </button>
+
+                        {/* LAST */}
+                        <button
+                            onClick={() => visit(galleries_payload.last_page_url)}
+                            disabled={currentPage === lastPage}
+                            className="px-4 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
+                        >
+                            Last
+                        </button>
                     </div>
+
+                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                        Page {currentPage} of {lastPage}
+                    </span>
+                </div>
+                    
                 </section>
 
                 {/* --- LIGHTBOX (MODERN POPUP) --- */}
@@ -205,8 +356,8 @@ export default function Gallery() {
                         {/* UI Controls */}
                         <div className="absolute top-8 left-8 right-8 flex justify-between items-center z-[110]">
                             <div className="flex items-center gap-4">
-                                <span className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-lg">IMAGE {lightboxIndex + 1} / {publicGalleries.length}</span>
-                                <h4 className="text-white font-bold hidden md:block">{publicGalleries[lightboxIndex].title}</h4>
+                                <span className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-lg">IMAGE {imageIdIndex + 1} / {imagesId?.length}</span>
+                                <h4 className="text-white font-bold hidden md:block">{galleries[lightboxIndex].title}</h4>
                             </div>
                             <button onClick={closeLightbox} className="w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md transition-all">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -234,11 +385,7 @@ export default function Gallery() {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="relative group">
-                                <img 
-                                    src={publicGalleries[lightboxIndex].image_url} 
-                                    alt={publicGalleries[lightboxIndex].title} 
-                                    className="max-h-[75vh] w-auto rounded-3xl shadow-[0_0_50px_-12px_rgba(59,130,246,0.5)] object-contain"
-                                />
+                                {renderImageItem(imageIdIndex)}
                                 {/* Mobile Nav Buttons Overlay */}
                                 <div className="absolute inset-0 flex lg:hidden items-center justify-between px-4 pointer-events-none">
                                     <button onClick={prevImage} className="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center text-white pointer-events-auto"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"></path></svg></button>
@@ -247,8 +394,8 @@ export default function Gallery() {
                             </div>
 
                             <div className="mt-8 text-center px-4">
-                                <h3 className="text-3xl font-black text-white mb-2 tracking-tight">{publicGalleries[lightboxIndex].title}</h3>
-                                <p className="text-blue-200 text-lg max-w-2xl font-medium leading-relaxed">{publicGalleries[lightboxIndex].description}</p>
+                                <h3 className="text-3xl font-black text-white mb-2 tracking-tight">{galleries[lightboxIndex].title}</h3>
+                                <p className="text-blue-200 text-lg max-w-2xl font-medium leading-relaxed">{galleries[lightboxIndex].description}</p>
                             </div>
                         </div>
                     </div>
