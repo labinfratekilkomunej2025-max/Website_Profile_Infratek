@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('news_components', function (Blueprint $table) {
-            $table->boolean('is_tumbnail')->nullable();
+        Schema::table('news', function (Blueprint $table) {
+            $table->string('description')->nullable();
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('news_components', function (Blueprint $table) {
-            $table->dropColumn('is_tumbnail');
+        Schema::table('news', function (Blueprint $table) {
+            $table->dropColumn('description');
         });
     }
 };

@@ -9,18 +9,27 @@ const options: Intl.DateTimeFormatOptions = {
     timeZone: targetTimeZone,
     timeZoneName: 'short'
 };
-const jakartaTime = new Intl.DateTimeFormat("en-US", {
+const jakartaTime = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Asia/Jakarta",
   year: "numeric",
-  month: "numeric",
-  day: "numeric",
+  month: "long",
+  day: "2-digit",
   hour: "2-digit",
   minute: "2-digit",
   second: "2-digit",
   hour12: false // Menggunakan format 24 jam
 });
-function getLocalTime(date: string){
+const jakartaTime_dmy = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Jakarta",
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+});
+function getLocalTime(date: string, no_time: boolean = false){
     const utcDate = new Date(date);
+    if (no_time){
+      return jakartaTime_dmy.format(utcDate);
+    }
     return jakartaTime.format(utcDate);
 }
 const entityMap: Record<string, string> = {

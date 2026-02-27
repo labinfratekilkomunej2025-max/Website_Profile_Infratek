@@ -6,4 +6,5 @@ enum NewsCompType:string
 {
     case TEXT = 'text';
     case IMAGE = 'image';
+    case QUOTE = 'quote';
 }

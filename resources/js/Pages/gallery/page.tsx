@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect} from 'react';
 import { Head, router } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import axios from 'axios';
+import { getLocalTime } from "@/Utils";
 
 type Gallery = {
     id: number;
     title: string;
     description: string;
+    created_at: string;
 }
 
 type Image = {
@@ -158,6 +160,7 @@ export default function Gallery(
 
                             <div className="px-4 py-6">
                                 <h3 className="text-lg font-black text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">{item.title}</h3>
+                                <p className="text-sm text-slate-300 font-medium line-clamp-2 leading-relaxed">{getLocalTime(item.created_at, true)}</p>
                                 <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed">{item.description}</p>
                             </div>
                         </div>
