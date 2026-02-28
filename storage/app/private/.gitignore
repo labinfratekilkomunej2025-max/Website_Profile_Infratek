@@ -1,2 +1,7 @@
 *
 !.gitignore
+!member_photos/
+!member_photos/widy.png
+!member_photos/yanuar.png
+!gallery_images
+!news_images

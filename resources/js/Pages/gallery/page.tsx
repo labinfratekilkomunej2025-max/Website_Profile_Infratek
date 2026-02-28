@@ -1,216 +1,391 @@
+import { useState, useEffect} from 'react';
+import { Head, router } from '@inertiajs/react';
+import MainLayout from '@/Layouts/MainLayout';
+import axios from 'axios';
+import { getLocalTime } from "@/Utils";
+import { PaginationData } from "@/SharedType";
 
-import { useState } from "react";
-import Navbar from "@/Components/Navbar";
-import Footer from "@/Components/Footer";
-import { NavbarProps } from '@/types';
-import { Head } from '@inertiajs/react';
+type Gallery = {
+    id: number;
+    title: string;
+    description: string;
+    created_at: string;
+}
+
+type Image = {
+    id: number|null,
+}
+
+type Props = {
+    galleries_payload: GalleryPayload;
+}
+
+type GalleryPayload = PaginationData & {
+    data: Gallery[];
+}
+
 export default function Gallery(
-  {
-    CurrentPath,
-    // HomePath,
-    // GalleryPath,
-    // ContactPath,
-  }: NavbarProps) {
-    const storageUrl: string = window.appConfig.storageUrl;
+        {galleries_payload} : Props
+    ) {
+    var galleries = galleries_payload.data;
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-    
-    const itemsPerPage = 9;
-    const totalItems = 13; // Total gambar yang tersedia
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-    const currentItems = Array.from(
-      { length: endIndex - startIndex },
-      (_, i) => startIndex + i + 1
-    );
-    
-    return (
-    <>  
-    <Head title="Gallery" />
-    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-white">
-      <Navbar 
-        CurrentPath={CurrentPath}
-      />
+    const currentPage = galleries_payload.current_page;
+    const lastPage = galleries_payload.last_page;
 
-      {/* Gallery Section */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute w-96 h-96 -top-48 -right-48 bg-blue-300/30 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute w-96 h-96 top-1/2 -left-48 bg-blue-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        </div>
+    const MAX_VISIBLE = 4;
 
-        <div className="relative max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-16 animate-fade-in">
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent">
-              Gallery
-            </h1>
-            <p className="text-xl text-gray-600">
-              Dokumentasi kegiatan dan fasilitas Laboratorium INFRATEK
-            </p>
-            <div className="w-32 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent mx-auto mt-6 shadow-lg shadow-blue-500/50"></div>
-          </div>
+    let start = Math.max(currentPage - 1, 1);
+    let end = start + MAX_VISIBLE - 1;
 
-          {/* Gallery Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {currentItems.map((imageNumber, index) => (
-              <div
-                key={imageNumber}
-                className={`relative group cursor-pointer animate-slide-up delay-${Math.min(
-                  index * 100,
-                  600
-                )}`}
-                onMouseEnter={() => setHoveredCard(imageNumber)}
-                onMouseLeave={() => setHoveredCard(null)}
-              >
-                {/* Glowing Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500 transform group-hover:scale-110"></div>
+    if (end > lastPage) {
+        end = lastPage;
+        start = Math.max(end - MAX_VISIBLE + 1, 1);
+    }
 
-                {/* Card */}
-                <div className="relative bg-white rounded-2xl overflow-hidden shadow-xl transform transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-blue-500/30">
-                  {/* Image Container - 16:9 Aspect Ratio */}
-                  <div className="relative w-full aspect-video bg-gradient-to-br from-blue-400 to-blue-600 overflow-hidden">
-                    {/* Gallery Image */}
-                    <div className="relative w-full h-full">
-                      <img
-                          src={`${storageUrl}/gallery/${imageNumber}.jpg`}
-                          alt={`Yanuar Nurdiansyah`}
-                          className="absolute inset-0 w-full h-full object-cover"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 320px, 384px"
-                      />
+    const visiblePages = [];
+    for (let i = start; i <= end; i++) {
+        visiblePages.push(i);
+    }
+    const [imagesId, setImagesId] = useState<Image[]>([]);
+    const [imageIdIndex, setImageIdIndex] = useState<number>(0);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [direction, setDirection] = useState<'next' | 'prev'>('next');
+
+    useEffect(()=>{
+        if (imageIdIndex==undefined){return}
+        console.log("DATA: ", imageIdIndex);
+    })
+    const changeImage = async (id: number) => {
+        try {
+            const res = await axios.get(route("galleries.images", id));
+            setImagesId(res.data);
+            setImageIdIndex(0)
+            setIsOpen(true);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+    const renderImageItem = (imgIndex: number)=>{
+        const gallery = galleries?.[lightboxIndex];
+        const image = imagesId?.[imgIndex!];
+
+        if (!gallery || !image) return null;
+        return (
+            <img
+                key={image.id}
+                src={route('galleries.image', {
+                    gallery: gallery.id,
+                    image: image.id
+                })}
+                alt={gallery.title}
+                loading="lazy"
+                className={`
+                    max-h-[75vh] w-auto rounded-3xl
+                    shadow-[0_0_50px_-12px_rgba(59,130,246,0.5)]
+                    object-contain
+                    transition-all duration-250 ease-in-out
+                    ${isAnimating
+                        ? direction === 'next'
+                            ? 'translate-x-10 opacity-0'
+                            : '-translate-x-10 opacity-0'
+                        : 'translate-x-0 opacity-100'
+                    }
+                `}
+            />
+        );
+    }
+    // --- LIGHTBOX ---
+    const [lightboxIndex, setLightboxIndex] = useState<number>(0);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+
+
+    const openLightbox = (itemId: number) => {
+        changeImage(itemId);
+        const index = galleries.findIndex(img => img.id === itemId);
+        setLightboxIndex(index);
+    };
+    function RenderGalleryItem(galleries: Gallery[]){
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {galleries.map((item, index) => (
+                    <div
+                        key={item.id}
+                        className="animate-gallery-item group relative"
+                        style={{ animationDelay: `${index * 100}ms` }}
+                        onClick={() => openLightbox(item.id)}
+                    >
+                        {/* Glowing Background Blur */}
+                        <div className="absolute inset-0 bg-blue-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                        <div className="relative bg-white rounded-[2rem] p-3 shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-2 cursor-pointer">
+                            <div className="relative aspect-[4/3] rounded-[1.5rem] overflow-hidden bg-slate-100">
+                                <img
+                                    src={route('galleries.image.tumbnail', item.id)}
+                                    alt={item.title}
+                                    loading="lazy"
+                                    className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
+                                    onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/e2e8f0/1e293b?text=Infratek+Documentation' }}
+                                />
+                                
+                                {/* Overlay Neon Corners */}
+                                <div className="absolute inset-4 border-2 border-white/0 group-hover:border-white/20 transition-all duration-500 rounded-xl"></div>
+                                <div className="absolute top-6 left-6 w-8 h-8 border-t-2 border-l-2 border-white/0 group-hover:border-white/80 transition-all duration-500"></div>
+                                <div className="absolute bottom-6 right-6 w-8 h-8 border-b-2 border-r-2 border-white/0 group-hover:border-white/80 transition-all duration-500"></div>
+
+                                {/* Hover Badge */}
+                                <div className="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                    <span className="bg-white text-blue-600 px-6 py-2 rounded-full font-black text-xs uppercase tracking-tighter shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                        See Images
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="px-4 py-6">
+                                <h3 className="text-lg font-black text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">{item.title}</h3>
+                                <p className="text-sm text-slate-300 font-medium line-clamp-2 leading-relaxed">{getLocalTime(item.created_at, true)}</p>
+                                <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed">{item.description}</p>
+                            </div>
+                        </div>
                     </div>
-                    {/* <Image
-                      src={`/assets/images/gallery/${imageNumber}.jpg`}
-                      alt={`Gallery Image ${imageNumber}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    /> */}
-
-                    {/* Decorative Neon Frame */}
-                    <div className="absolute inset-0 border-4 border-white/30 group-hover:border-white/50 transition-all duration-300"></div>
-                    <div className="absolute top-2 left-2 w-12 h-12 border-t-4 border-l-4 border-white/60 group-hover:w-16 group-hover:h-16 transition-all duration-300"></div>
-                    <div className="absolute top-2 right-2 w-12 h-12 border-t-4 border-r-4 border-white/60 group-hover:w-16 group-hover:h-16 transition-all duration-300"></div>
-                    <div className="absolute bottom-2 left-2 w-12 h-12 border-b-4 border-l-4 border-white/60 group-hover:w-16 group-hover:h-16 transition-all duration-300"></div>
-                    <div className="absolute bottom-2 right-2 w-12 h-12 border-b-4 border-r-4 border-white/60 group-hover:w-16 group-hover:h-16 transition-all duration-300"></div>
-
-                    {/* Overlay on Hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-6">
-                      <button className="bg-white text-blue-600 px-6 py-2 rounded-full font-semibold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-110">
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Card Footer */}
-                  <div className="p-5">
-                    <h3 className="text-lg font-bold text-gray-800 mb-2">
-                      Gallery Image {imageNumber}
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      Dokumentasi kegiatan laboratorium infrastruktur teknologi
-                    </p>
-                  </div>
-
-                  {/* Bottom Neon Line */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-all duration-500 shadow-lg shadow-blue-500/50"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Pagination */}
-          <div className="flex justify-center items-center gap-4">
-            {/* Previous Button */}
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className={`group relative px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                currentPage === 1
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-500/50 hover:scale-105"
-              }`}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-
-            {/* Page Numbers */}
-            <div className="flex gap-2">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`relative w-12 h-12 rounded-xl font-bold transition-all duration-300 ${
-                      currentPage === page
-                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/50 scale-110"
-                        : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:scale-105"
-                    }`}
-                  >
-                    {page}
-                    {currentPage === page && (
-                      <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 h-1 bg-blue-400 rounded-full shadow-lg shadow-blue-500/50"></span>
-                    )}
-                  </button>
-                )
-              )}
+                ))}
             </div>
+        );
+    }
+    const visit = (url: string | null) => {
+        if (!url) return;
 
-            {/* Next Button */}
-            <button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              disabled={currentPage === totalPages}
-              className={`group relative px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                currentPage === totalPages
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-500/50 hover:scale-105"
-              }`}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </div>
+        router.get(url, {}, {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['galleries_payload'],
+        });
+    };
 
-          {/* Page Info */}
-          <div className="text-center mt-6">
-            <p className="text-gray-600">
-              Halaman {currentPage} dari {totalPages}
-            </p>
-          </div>
-        </div>
-      </section>
+    const closeLightbox = () => setIsOpen(false);
 
-      <Footer />
-    </div>
-    </>
-  );
+    const nextImage = () => {
+        if (isAnimating || !imagesId.length) return;
+
+        setDirection('next');
+        setIsAnimating(true);
+
+        setImageIdIndex(prev =>
+            prev === null ? 0 : (prev + 1) % imagesId.length
+        );
+
+        setTimeout(() => {
+            setIsAnimating(false);
+        }, 1000); // 1 detik lock
+    };
+
+    const prevImage = () => {
+        if (isAnimating || !imagesId.length) return;
+
+        setDirection('prev');
+        setIsAnimating(true);
+
+        setImageIdIndex(prev =>
+            prev === null ? 0 : (prev - 1 + imagesId.length) % imagesId.length
+        );
+
+        setTimeout(() => {
+            setIsAnimating(false);
+        }, 1000);
+    };
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!isOpen) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowRight') nextImage();
+            if (e.key === 'ArrowLeft') prevImage();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, nextImage, prevImage]);
+
+    return (
+        <MainLayout>
+            <Head title="Gallery - Lab Infratek" />
+
+            <style>{`
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(30px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes zoomIn {
+                    from { opacity: 0; transform: scale(0.95); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                .animate-gallery-item {
+                    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+                }
+            `}</style>
+
+            <div className="min-h-screen bg-slate-50 font-sans pb-24 overflow-hidden">
+                
+                {/* Header Section */}
+                <section className="relative pt-32 pb-20 px-6 text-center">
+                    <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:32px_32px] opacity-10 pointer-events-none"></div>
+                    
+                    <div className="relative z-10 max-w-4xl mx-auto" style={{ animation: 'fadeInUp 0.8s ease-out' }}>
+                        <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight text-slate-900">
+                            Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Gallery</span>
+                        </h1>
+                        <p className="text-lg md:text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
+                            Visualisasi perjalanan, kolaborasi, dan infrastruktur terkini di Laboratorium INFRATEK.
+                        </p>
+                        <div className="w-24 h-1.5 bg-blue-600 rounded-full mx-auto mt-8 shadow-lg shadow-blue-500/20"></div>
+                    </div>
+                </section>
+
+                {/* Gallery Grid */}
+                <section className="max-w-7xl mx-auto px-6 mb-20">
+                    {RenderGalleryItem(galleries)}
+                    <div className="flex flex-col items-center mt-20 gap-6">
+
+                        <div className="flex items-center gap-2">
+
+                            {/* FIRST */}
+                            <button
+                                onClick={() => visit(galleries_payload.first_page_url)}
+                                disabled={currentPage === 1}
+                                className="px-4 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
+                            >
+                                First
+                            </button>
+
+                            {/* PREV */}
+                            <button
+                                onClick={() => visit(galleries_payload.prev_page_url)}
+                                disabled={!galleries_payload.prev_page_url}
+                                className="w-12 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
+                            >
+                                ‹
+                            </button>
+
+                            {/* PAGE NUMBERS (MAX 4) */}
+                            {start > 1 && (
+                                <>
+                                    <button
+                                        onClick={() => visit(`${galleries_payload.path}?page=1`)}
+                                        className="w-12 h-12 rounded-2xl bg-white border shadow-sm"
+                                    >
+                                        1
+                                    </button>
+                                    {start > 2 && <span className="px-2">…</span>}
+                                </>
+                            )}
+
+                            {visiblePages.map(page => (
+                                <button
+                                    key={page}
+                                    onClick={() => visit(`${galleries_payload.path}?page=${page}`)}
+                                    className={`w-12 h-12 rounded-2xl font-black text-sm transition-all
+                                        ${page === currentPage
+                                            ? "bg-blue-600 text-white shadow-lg scale-110"
+                                            : "bg-white text-slate-400 border shadow-sm hover:text-blue-600"
+                                        }`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+
+                            {end < lastPage && (
+                                <>
+                                    {end < lastPage - 1 && <span className="px-2">…</span>}
+                                    <button
+                                        onClick={() => visit(`${galleries_payload.path}?page=${lastPage}`)}
+                                        className="w-12 h-12 rounded-2xl bg-white border shadow-sm"
+                                    >
+                                        {lastPage}
+                                    </button>
+                                </>
+                            )}
+
+                            {/* NEXT */}
+                            <button
+                                onClick={() => visit(galleries_payload.next_page_url)}
+                                disabled={!galleries_payload.next_page_url}
+                                className="w-12 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
+                            >
+                                ›
+                            </button>
+
+                            {/* LAST */}
+                            <button
+                                onClick={() => visit(galleries_payload.last_page_url)}
+                                disabled={currentPage === lastPage}
+                                className="px-4 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
+                            >
+                                Last
+                            </button>
+                        </div>
+
+                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                            Page {currentPage} of {lastPage}
+                        </span>
+                    </div>
+                    
+                </section>
+
+                {/* --- LIGHTBOX (MODERN POPUP) --- */}
+                {isOpen && (
+                    <div 
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 overflow-hidden animate-fade-in"
+                        onClick={closeLightbox}
+                    >
+                        {/* Glassmorphism Background */}
+                        <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl"></div>
+                        
+                        {/* UI Controls */}
+                        <div className="absolute top-8 left-8 right-8 flex justify-between items-center z-[110]">
+                            <div className="flex items-center gap-4">
+                                <span className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-lg">IMAGE {imageIdIndex + 1} / {imagesId?.length}</span>
+                                <h4 className="text-white font-bold hidden md:block">{galleries[lightboxIndex].title}</h4>
+                            </div>
+                            <button onClick={closeLightbox} className="w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md transition-all">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+
+                        {/* Navigation Arrows */}
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                            className="absolute left-8 w-16 h-16 hidden lg:flex items-center justify-center bg-white/5 hover:bg-white/10 text-white rounded-2xl backdrop-blur-md transition-all z-[110] group"
+                        >
+                            <svg className="w-8 h-8 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                            className="absolute right-8 w-16 h-16 hidden lg:flex items-center justify-center bg-white/5 hover:bg-white/10 text-white rounded-2xl backdrop-blur-md transition-all z-[110] group"
+                        >
+                            <svg className="w-8 h-8 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+
+                        {/* Image & Text */}
+                        <div 
+                            className="relative max-w-5xl w-full flex flex-col items-center z-[105] animate-zoom-in"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="relative group">
+                                {renderImageItem(imageIdIndex)}
+                                {/* Mobile Nav Buttons Overlay */}
+                                <div className="absolute inset-0 flex lg:hidden items-center justify-between px-4 pointer-events-none">
+                                    <button onClick={prevImage} className="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center text-white pointer-events-auto"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"></path></svg></button>
+                                    <button onClick={nextImage} className="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center text-white pointer-events-auto"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"></path></svg></button>
+                                </div>
+                            </div>
+
+                            <div className="mt-8 text-center px-4">
+                                <h3 className="text-3xl font-black text-white mb-2 tracking-tight">{galleries[lightboxIndex].title}</h3>
+                                <p className="text-blue-200 text-lg max-w-2xl font-medium leading-relaxed">{galleries[lightboxIndex].description}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </MainLayout>
+    );
 }

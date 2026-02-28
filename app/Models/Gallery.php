@@ -20,11 +20,11 @@ class Gallery extends Model
         'created_at' => 'datetime',
         'edited_at' => 'datetime',
     ];
-    public function user():BelongsTo
+    public function editor():BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-    public function gallery_images():HasMany
+    public function images():HasMany
     {
         return $this->hasMany(GalleryImage::class);
     }

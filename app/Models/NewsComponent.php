@@ -13,6 +13,7 @@ class NewsComponent extends Model
         'type',
         'text_content',
         'image_path',
+        'is_tumbnail',
         'order',
         'created_by_id',
         'alt_text',

@@ -30,6 +30,30 @@ return [
 
     'disks' => [
 
+        'member_photos' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/member_photos'),
+            'serve' => true,
+            'throw' => false,
+            'report' => false,
+            'visibility' => 'private',
+        ],
+        'private_gallery_images' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/gallery_images'),
+            'serve' => true,
+            'throw' => false,
+            'report' => false,
+            'visibility' => 'private',
+        ],
+        'private_news_images' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/news_images'),
+            'serve' => true,
+            'throw' => false,
+            'report' => false,
+            'visibility' => 'private',
+        ],
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
