@@ -14,7 +14,7 @@ use App\Http\Controllers\MemberManagement\DivisionController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\NewsController;
 
-Route::prefix('galleries')->name('galleries.')->group(function () {
+Route::prefix('gallery')->name('galleries.')->group(function () {
     Route::get('/', [GalleryController::class, 'index'])->name('index');
     Route::get('/{id}', [GalleryController::class, 'show'])->name('show');
     Route::get('/image/tumbnail/{gallery}', [GalleryController::class, 'image_tumbnail'])->name('image.tumbnail');
@@ -33,7 +33,8 @@ Route::middleware(['auth'])->prefix('galleries')->name('galleries.')->group(func
 });
 
 // For routes that can be accessed for anyone
-Route::get('/', [GuestController::class, 'Home'])->name('home');
+Route::get('/', function(){return redirect(route('home'));})->name('root');
+Route::get('/home', [GuestController::class, 'Home'])->name('home');
 Route::get('/gallery', [GuestController::class, 'Gallery'])->name('gallery');
 Route::get('/contact', [GuestController::class, 'Contact'])->name('contact');
 Route::get('/about/get-members/{period}', [GuestController::class, 'GetMembers'])->name('get-members');
@@ -109,8 +110,8 @@ Route::name('management-details.')->prefix('management-details')->group(function
 
 Route::prefix('news')->name('news.')->group(function () {
     Route::get('/tumbnail/{news_component}', [NewsController::class, 'getTumbnailPublic'])->name('tumbnail');
-    Route::get('/news/{news}', [NewsController::class, 'viewDetail'])->name('detail');
-    Route::get('/news/image/{news_component}', [NewsController::class, 'getImage'])->name('image');
+    Route::get('/{news}', [NewsController::class, 'viewDetail'])->name('detail');
+    Route::get('/image/{news_component}', [NewsController::class, 'getImage'])->name('image');
 });
 
 require __DIR__.'/auth.php';

@@ -21,8 +21,7 @@ export default function Navbar() {
 
     // Helper untuk cek link aktif, karena Inertia kadang url-nya bisa '/gallery?page=2'
     // Kita cek apakah url dimulai dengan path yang dimaksud untuk exact match home '/'
-    const isActive = (path: string) => pathname === path;
-
+    const isActive = (path: string) => pathname.startsWith(path);
     return (
         <nav
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -62,28 +61,27 @@ export default function Navbar() {
                     <div className="hidden md:flex items-center gap-8">
                         {/* HOME LINK */}
                         <Link
-                            href="/"
+                            href={'/home'}
                             className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
-                                isActive('/')
+                                isActive('/home')
                                     ? 'text-blue-600'
                                     : 'text-gray-700 hover:text-blue-600'
                             }`}
                         >
                             <span className="relative z-10">Home</span>
-                            {isActive('/') && (
+                            {isActive('/home') ? (
                                 <>
                                     <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
                                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
                                 </>
-                            )}
-                            {!isActive('/') && (
+                            ):(
                                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
                             )}
                         </Link>
 
                         {/* NEWS LINK */}
                         <Link
-                            href="/news"
+                            href={'/news'}
                             className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
                                 isActive('/news')
                                     ? 'text-blue-600'
@@ -91,20 +89,19 @@ export default function Navbar() {
                             }`}
                         >
                             <span className="relative z-10">News</span>
-                            {isActive('/news') && (
+                            {isActive('/news') ? (
                                 <>
                                     <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
                                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
                                 </>
-                            )}
-                            {!isActive('/news') && (
+                            ):(
                                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
                             )}
                         </Link>
 
                         {/* ABOUT LINK */}
                         <Link
-                            href="/about"
+                            href={'/about'}
                             className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
                                 isActive('/about')
                                     ? 'text-blue-600'
@@ -112,13 +109,12 @@ export default function Navbar() {
                             }`}
                         >
                             <span className="relative z-10">About</span>
-                            {isActive('/about') && (
+                            {isActive('/about') ? (
                                 <>
                                     <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
                                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
                                 </>
-                            )}
-                            {!isActive('/about') && (
+                            ):(
                                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
                             )}
                         </Link>
@@ -127,42 +123,40 @@ export default function Navbar() {
 
                         {/* GALLERY LINK */}
                         <Link
-                            href="/gallery"
+                            href={'gallery'}
                             className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
-                                isActive('/gallery')
+                                isActive('gallery')
                                     ? 'text-blue-600'
                                     : 'text-gray-700 hover:text-blue-600'
                             }`}
                         >
                             <span className="relative z-10">Gallery</span>
-                            {isActive('/gallery') && (
+                            {isActive('gallery') ? (
                                 <>
                                     <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
                                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
                                 </>
-                            )}
-                            {!isActive('/gallery') && (
+                            ):(
                                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
                             )}
                         </Link>
 
                         {/* CONTACT LINK */}
                         <Link
-                            href="/contact"
+                            href={'contact'}
                             className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
-                                isActive('/contact')
+                                isActive('contact')
                                     ? 'text-blue-600'
                                     : 'text-gray-700 hover:text-blue-600'
                             }`}
                         >
                             <span className="relative z-10">Contact</span>
-                            {isActive('/contact') && (
+                            {isActive('contact') ? (
                                 <>
                                     <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
                                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
                                 </>
-                            )}
-                            {!isActive('/contact') && (
+                            ):(
                                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
                             )}
                         </Link>
@@ -201,12 +195,12 @@ export default function Navbar() {
 
                 {/* Mobile Menu */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden mt-4 pb-4 space-y-2 animate-fade-in">
+                    <div className="md:hidden mt-4 pb-4 space-y-2 animate-fade-in max-h-[30vh] overflow-y-auto">
                         <Link
-                            href="/"
+                            href={'/home'}
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                                isActive('/')
+                                isActive('/home')
                                     ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
                                     : 'text-gray-700 hover:bg-blue-50'
                             }`}
@@ -214,10 +208,32 @@ export default function Navbar() {
                             Home
                         </Link>
                         <Link
-                            href="/gallery"
+                            href={'/news'}
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                                isActive('/gallery')
+                                isActive('/news')
+                                    ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
+                                    : 'text-gray-700 hover:bg-blue-50'
+                            }`}
+                        >
+                            News
+                        </Link>
+                        <Link
+                            href={'/about'}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
+                                isActive('/about')
+                                    ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
+                                    : 'text-gray-700 hover:bg-blue-50'
+                            }`}
+                        >
+                            About
+                        </Link>
+                        <Link
+                            href={'gallery'}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
+                                isActive('gallery')
                                     ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
                                     : 'text-gray-700 hover:bg-blue-50'
                             }`}
@@ -225,10 +241,10 @@ export default function Navbar() {
                             Gallery
                         </Link>
                         <Link
-                            href="/contact"
+                            href={'contact'}
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                                isActive('/contact')
+                                isActive('contact')
                                     ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
                                     : 'text-gray-700 hover:bg-blue-50'
                             }`}
