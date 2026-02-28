@@ -20,7 +20,7 @@ class NewsSeeder extends Seeder
                 'created_by_id'=> 1,
                 'created_at'=> Carbon::now(),
                 'edited_at'=> Carbon::now(),
-                'is_public'=> false,
+                'is_public'=> true,
                 'description'=> 'Laboratorium Infratek mengadakan pelatihan jaringan komputer dasar untuk mahasiswa semester awal guna mengenalkan konsep routing dan switching',
             ],
             [

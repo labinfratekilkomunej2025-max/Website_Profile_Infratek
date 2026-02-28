@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -80,14 +80,14 @@ const ProfileCard = ({ person, isHead = false, isBph = false, isLecturer = false
                     loading="lazy"
                     className={`rounded-full object-cover bg-gray-50 transition-transform duration-500 group-hover:scale-110 ${isBph ? 'w-24 h-24 border-4 border-blue-50 shadow-sm' : isHead ? 'w-20 h-20 border-2 border-blue-200 shadow-sm' : 'w-16 h-16 border-2 border-slate-100'}`}
                 />
-                {isHead && (
+                {/* {isHead && (
                     <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-md whitespace-nowrap">
                         {person.position_name}
                     </span>
-                )}
+                )} */}
             </div>
             <h4 className="font-bold text-center mb-1 text-sm md:text-base text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">{person.full_name}</h4>
-            <p className={`text-xs text-center mb-4 ${isHead ? 'text-blue-600 font-semibold' : 'text-slate-500'}`}>{person.position_name}</p>
+            <p className={`text-xs text-center mb-4 ${isHead ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-md whitespace-nowrap' : 'text-slate-500'}`}>{person.position_name}</p>
             
             {/* Social Links (Hanya LinkedIn) */}
             <div className="flex mt-auto">
@@ -232,26 +232,23 @@ const renderDivisions = (members: Members, division_keys: string[]) => {
 }
 const renderView = (members: Members) => {
         const keys = Object.keys(members);
-
         return (
             <>
-                {keys.map((divisionName, idx) => {
-                    switch (idx) {
-                        case 0:
-                            return <React.Fragment key={divisionName}>
-                                {renderKepalaPranta(members[divisionName])}
-                            </React.Fragment> 
-                                
-                        case 1:
-                            return <React.Fragment key={divisionName}>
-                                {renderBPH(members[divisionName])}
-                            </React.Fragment> 
-                        default:
-                            return <React.Fragment key={divisionName}>
-                                {renderDivisions(members, keys.slice(2))}
-                            </React.Fragment> 
-                    }
-                })}
+                {keys.length>=0 && (
+                    <React.Fragment key={keys[0]}>
+                        {renderKepalaPranta(members[keys[0]])}
+                    </React.Fragment>
+                )}
+                {keys.length>=1 && (
+                    <React.Fragment key={keys[1]}>
+                        {renderBPH(members[keys[1]])}
+                    </React.Fragment> 
+                )}
+                {keys.length>=2 && (
+                    <React.Fragment key={keys[2]}>
+                        {renderDivisions(members, keys.slice(2))}
+                    </React.Fragment> 
+                )}
             </>
         );
     };
@@ -391,7 +388,7 @@ export default function About(
                         </div>
                     </div>
 
-                    {members!=null ? renderView(members) : <></>}
+                    {members!=null ? renderView(members) : <div>Belum ada Data</div>}
 
                 </section>
             </div>

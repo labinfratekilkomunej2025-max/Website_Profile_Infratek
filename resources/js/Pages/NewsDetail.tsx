@@ -1,53 +1,49 @@
 import { Link, Head } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
-
+import {NewsGuest} from '@/SharedType';
+import { getLocalTime } from '@/Utils';
+import { PageProps } from '@/types';
 // Interface untuk tipe data konten dinamis
 interface NewsContent {
     type: 'text' | 'image' | 'quote';
     value: string;
     caption?: string; // Hanya untuk image
 }
+type NewsComponent = {
+    id: number;
+    news_id: number;
+    type: string;
+    text_content: string|null;
+    image_path:string|null;
+    is_tumbnail:boolean|null;
+    order:number;
+    created_by_id:number|null;
+    alt_text:string|null;
+}
+type NewsData = NewsGuest & {
+    creator: NewsCreator;
+    news_components: NewsComponent[];
+}
+type NewsCreator = {
+    id: number;
+    name: string;
+}
+type Props = PageProps & {
+    news: NewsData;
+    prev_link: string;
+}
 
-export default function NewsDetail({ slug }: { slug: string }) {
-    
-    // --- DATA DUMMY (Pura-pura dari Database) ---
-    // Di backend nanti, ini diambil dari tabel NewsComponents
-    const article = {
-        title: "Kegiatan Pelatihan Jaringan Komputer Dasar 2026",
-        date: "12 Februari 2026",
-        author: "Admin Infratek",
-        category: "Pelatihan",
-        thumbnail: "/assets/images/gallery/1.jpg", // Pastikan file ada
-        
-        // INI FITUR UTAMA: Array komponen dinamis
-        content: [
-            {
-                type: 'text',
-                value: "Laboratorium Infrastruktur Teknologi (INFRATEK) kembali mengadakan pelatihan rutin tahunan yang ditujukan untuk mahasiswa semester awal Fakultas Ilmu Komputer. Kegiatan ini bertujuan untuk mengenalkan dasar-dasar jaringan komputer sebelum mereka menempuh mata kuliah lanjut."
-            },
-            {
-                type: 'image',
-                value: "/assets/images/gallery/2.jpg", // Gambar di tengah artikel
-                caption: "Suasana antusias peserta pelatihan saat sesi praktik routing."
-            },
-            {
-                type: 'text',
-                value: "Dalam pelatihan ini, materi yang disampaikan mencakup pengenalan perangkat keras jaringan seperti Router, Switch, dan Access Point, serta simulasi menggunakan Cisco Packet Tracer. Antusiasme peserta terlihat sangat tinggi, terutama pada sesi hands-on lab."
-            },
-            {
-                type: 'quote',
-                value: "Kami berharap pelatihan ini bisa menjadi bekal awal yang kuat bagi mahasiswa Fasilkom untuk menjadi Network Engineer handal di masa depan."
-            },
-            {
-                type: 'text',
-                value: "Kegiatan ditutup dengan sesi foto bersama dan pembagian sertifikat keikutsertaan kepada seluruh peserta yang hadir."
-            }
-        ] as NewsContent[]
-    };
+export default function NewsDetail(
+    {auth, news, prev_link} : Props
+) {
+    const news_components = news.news_components;
+    console.log(news);
+    console.log(auth.user);
+    const tumbnailIndex = news_components.findIndex((item:NewsComponent)=>{return item.is_tumbnail});
 
     return (
         <MainLayout>
-            <Head title={`${article.title} - Lab Infratek`} />
+            <Head title={`${news.title} - Lab Infratek`} />
 
             <div className="min-h-screen bg-white">
                 
@@ -55,8 +51,9 @@ export default function NewsDetail({ slug }: { slug: string }) {
                 <div className="relative h-[60vh] min-h-[400px]">
                     <div className="absolute inset-0">
                         <img 
-                            src={article.thumbnail} 
-                            alt={article.title} 
+                            src={route('news.image', news_components[tumbnailIndex].id)} 
+                            alt={news.title} 
+                            loading="lazy"
                             className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
@@ -64,20 +61,17 @@ export default function NewsDetail({ slug }: { slug: string }) {
                     
                     {/* Judul & Meta di atas gambar */}
                     <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-12 max-w-4xl mx-auto">
-                        <span className="inline-block px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-full mb-4 shadow-lg shadow-blue-500/50">
-                            {article.category}
-                        </span>
                         <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
-                            {article.title}
+                            {news.title}
                         </h1>
                         <div className="flex items-center gap-6 text-gray-300 text-sm sm:text-base">
                             <div className="flex items-center gap-2">
                                 <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                {article.date}
+                                {getLocalTime(news.created_at, true)}
                             </div>
                             <div className="flex items-center gap-2">
                                 <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                {article.author}
+                                {news.creator.name}
                             </div>
                         </div>
                     </div>
@@ -87,12 +81,12 @@ export default function NewsDetail({ slug }: { slug: string }) {
                 <div className="max-w-3xl mx-auto px-6 py-12">
                     <article className="space-y-8">
                         {/* LOGIC RENDER: Loop isi konten sesuai urutan */}
-                        {article.content.map((block, index) => {
+                        {news_components.slice(tumbnailIndex+1)?.map((block, index) => {
                             // Render Teks
                             if (block.type === 'text') {
                                 return (
                                     <p key={index} className="text-gray-700 text-lg leading-relaxed">
-                                        {block.value}
+                                        {block.text_content}
                                     </p>
                                 );
                             }
@@ -103,14 +97,15 @@ export default function NewsDetail({ slug }: { slug: string }) {
                                     <figure key={index} className="my-8 group">
                                         <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-100">
                                             <img 
-                                                src={block.value} 
-                                                alt={block.caption || "Gambar Artikel"} 
+                                                src={route('news.image',block.id)} 
+                                                alt={block.alt_text || "Gambar Artikel"} 
+                                                loading="lazy"
                                                 className="w-full h-auto transform group-hover:scale-105 transition-transform duration-700"
                                             />
                                         </div>
-                                        {block.caption && (
+                                        {block.text_content && (
                                             <figcaption className="text-center text-gray-500 text-sm mt-3 italic">
-                                                {block.caption}
+                                                {block.text_content}
                                             </figcaption>
                                         )}
                                     </figure>
@@ -121,7 +116,7 @@ export default function NewsDetail({ slug }: { slug: string }) {
                             if (block.type === 'quote') {
                                 return (
                                     <blockquote key={index} className="border-l-4 border-blue-500 pl-6 py-2 my-8 italic text-xl text-gray-800 bg-blue-50 rounded-r-lg">
-                                        "{block.value}"
+                                        "{block.text_content}"
                                     </blockquote>
                                 );
                             }
@@ -134,7 +129,7 @@ export default function NewsDetail({ slug }: { slug: string }) {
                     {/* Navigation Buttons */}
                     <div className="flex justify-between items-center">
                         <Link 
-                            href="/news" 
+                            href={prev_link}
                             className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-semibold transition-colors"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>

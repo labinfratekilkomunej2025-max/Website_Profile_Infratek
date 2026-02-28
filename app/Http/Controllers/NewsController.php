@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\News;
 use App\Models\NewsComponent;
+use App\Enums\NewsCompType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class NewsController extends Controller
 {
@@ -59,9 +62,9 @@ class NewsController extends Controller
     }
 
     // Update komponen
-    public function update(Request $request, $id)
+    public function update(Request $request, NewsComponent $id)
     {
-        $component = NewsComponent::findOrFail($id);
+        $component = $id;
 
         $request->validate([
             'type' => 'required',
@@ -99,13 +102,29 @@ class NewsController extends Controller
 
 
     // Memanggil semua komponen news 
-    public function getComponents($id)
+    public function viewDetail(Request $request, News $news)
     {
-        $components = NewsComponent::where('news_id', $id)
-            ->orderBy('order')
-            ->get();
+        $is_login = Auth::check();
 
-        return response()->json($components);
+        if (!$is_login && !$news->is_public) {
+            abort(401, 'unauthorized access');
+        }
+
+        if ($is_login) {
+            $news->load([
+                'creator:id,name',
+                'news_components'
+            ]);
+        } else {
+            $news->load([
+                'news_components'
+            ]);
+        }
+
+        return Inertia::render('NewsDetail', [
+            'news' => $news,
+            'prev_link' => $request->query('from'),
+        ]);
     }
 
     public function index()
@@ -118,4 +137,30 @@ class NewsController extends Controller
     {
         return view('news.create');
     }
+
+    public function getAllType()
+    {
+        return ; 
+    }
+
+    public function getTumbnailPublic(NewsComponent $news_component)
+    {
+        if (!$news_component->news->is_public){abort(401, 'Unauthorized access.');}
+        if ($news_component->image_path != null && Storage::disk('private_news_images')->exists($news_component->image_path))
+        {
+            return Storage::disk('private_news_images')->response($news_component->image_path);
+        }else{
+            return redirect('https://placehold.co/600x400/e2e8f0/475569?text=Image+Not+Found');
+        }
+    }
+    public function getImage(NewsComponent $news_component)
+    {
+        if ($news_component->image_path != null && Storage::disk('private_news_images')->exists($news_component->image_path))
+        {
+            return Storage::disk('private_news_images')->response($news_component->image_path);
+        }else{
+            return redirect('https://placehold.co/600x400/e2e8f0/475569?text=Image+Not+Found');
+        }
+    }
+
 }

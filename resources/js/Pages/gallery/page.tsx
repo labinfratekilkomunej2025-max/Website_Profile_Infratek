@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import axios from 'axios';
 import { getLocalTime } from "@/Utils";
+import { PaginationData } from "@/SharedType";
 
 type Gallery = {
     id: number;
@@ -19,27 +20,8 @@ type Props = {
     galleries_payload: GalleryPayload;
 }
 
-type Link = {
-    url: string|null;
-    label: string;
-    page: string | null;
-    active: boolean;
-}
-
-type GalleryPayload = {
+type GalleryPayload = PaginationData & {
     data: Gallery[];
-    current_page: number;
-    first_page_url: string;
-    from: number;
-    last_page: number;
-    last_page_url: string;
-    links: Link[];
-    next_page_url: string|null;
-    path: string;
-    per_page: number;
-    prev_page_url: string|null;
-    to: number;
-    total: number;
 }
 
 export default function Gallery(
@@ -262,88 +244,88 @@ export default function Gallery(
                     {RenderGalleryItem(galleries)}
                     <div className="flex flex-col items-center mt-20 gap-6">
 
-                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
 
-                        {/* FIRST */}
-                        <button
-                            onClick={() => visit(galleries_payload.first_page_url)}
-                            disabled={currentPage === 1}
-                            className="px-4 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
-                        >
-                            First
-                        </button>
-
-                        {/* PREV */}
-                        <button
-                            onClick={() => visit(galleries_payload.prev_page_url)}
-                            disabled={!galleries_payload.prev_page_url}
-                            className="w-12 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
-                        >
-                            ‹
-                        </button>
-
-                        {/* PAGE NUMBERS (MAX 4) */}
-                        {start > 1 && (
-                            <>
-                                <button
-                                    onClick={() => visit(`${galleries_payload.path}?page=1`)}
-                                    className="w-12 h-12 rounded-2xl bg-white border shadow-sm"
-                                >
-                                    1
-                                </button>
-                                {start > 2 && <span className="px-2">…</span>}
-                            </>
-                        )}
-
-                        {visiblePages.map(page => (
+                            {/* FIRST */}
                             <button
-                                key={page}
-                                onClick={() => visit(`${galleries_payload.path}?page=${page}`)}
-                                className={`w-12 h-12 rounded-2xl font-black text-sm transition-all
-                                    ${page === currentPage
-                                        ? "bg-blue-600 text-white shadow-lg scale-110"
-                                        : "bg-white text-slate-400 border shadow-sm hover:text-blue-600"
-                                    }`}
+                                onClick={() => visit(galleries_payload.first_page_url)}
+                                disabled={currentPage === 1}
+                                className="px-4 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
                             >
-                                {page}
+                                First
                             </button>
-                        ))}
 
-                        {end < lastPage && (
-                            <>
-                                {end < lastPage - 1 && <span className="px-2">…</span>}
+                            {/* PREV */}
+                            <button
+                                onClick={() => visit(galleries_payload.prev_page_url)}
+                                disabled={!galleries_payload.prev_page_url}
+                                className="w-12 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
+                            >
+                                ‹
+                            </button>
+
+                            {/* PAGE NUMBERS (MAX 4) */}
+                            {start > 1 && (
+                                <>
+                                    <button
+                                        onClick={() => visit(`${galleries_payload.path}?page=1`)}
+                                        className="w-12 h-12 rounded-2xl bg-white border shadow-sm"
+                                    >
+                                        1
+                                    </button>
+                                    {start > 2 && <span className="px-2">…</span>}
+                                </>
+                            )}
+
+                            {visiblePages.map(page => (
                                 <button
-                                    onClick={() => visit(`${galleries_payload.path}?page=${lastPage}`)}
-                                    className="w-12 h-12 rounded-2xl bg-white border shadow-sm"
+                                    key={page}
+                                    onClick={() => visit(`${galleries_payload.path}?page=${page}`)}
+                                    className={`w-12 h-12 rounded-2xl font-black text-sm transition-all
+                                        ${page === currentPage
+                                            ? "bg-blue-600 text-white shadow-lg scale-110"
+                                            : "bg-white text-slate-400 border shadow-sm hover:text-blue-600"
+                                        }`}
                                 >
-                                    {lastPage}
+                                    {page}
                                 </button>
-                            </>
-                        )}
+                            ))}
 
-                        {/* NEXT */}
-                        <button
-                            onClick={() => visit(galleries_payload.next_page_url)}
-                            disabled={!galleries_payload.next_page_url}
-                            className="w-12 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
-                        >
-                            ›
-                        </button>
+                            {end < lastPage && (
+                                <>
+                                    {end < lastPage - 1 && <span className="px-2">…</span>}
+                                    <button
+                                        onClick={() => visit(`${galleries_payload.path}?page=${lastPage}`)}
+                                        className="w-12 h-12 rounded-2xl bg-white border shadow-sm"
+                                    >
+                                        {lastPage}
+                                    </button>
+                                </>
+                            )}
 
-                        {/* LAST */}
-                        <button
-                            onClick={() => visit(galleries_payload.last_page_url)}
-                            disabled={currentPage === lastPage}
-                            className="px-4 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
-                        >
-                            Last
-                        </button>
+                            {/* NEXT */}
+                            <button
+                                onClick={() => visit(galleries_payload.next_page_url)}
+                                disabled={!galleries_payload.next_page_url}
+                                className="w-12 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
+                            >
+                                ›
+                            </button>
+
+                            {/* LAST */}
+                            <button
+                                onClick={() => visit(galleries_payload.last_page_url)}
+                                disabled={currentPage === lastPage}
+                                className="px-4 h-12 rounded-2xl bg-white border shadow-sm disabled:opacity-40"
+                            >
+                                Last
+                            </button>
+                        </div>
+
+                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                            Page {currentPage} of {lastPage}
+                        </span>
                     </div>
-
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                        Page {currentPage} of {lastPage}
-                    </span>
-                </div>
                     
                 </section>
 

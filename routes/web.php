@@ -12,6 +12,7 @@ use App\Http\Controllers\MemberManagement\PositionController;
 use App\Http\Controllers\MemberManagement\PeriodController;
 use App\Http\Controllers\MemberManagement\DivisionController;
 use App\Http\Controllers\GuestController;
+use App\Http\Controllers\NewsController;
 
 Route::prefix('galleries')->name('galleries.')->group(function () {
     Route::get('/', [GalleryController::class, 'index'])->name('index');
@@ -32,13 +33,12 @@ Route::middleware(['auth'])->prefix('galleries')->name('galleries.')->group(func
 });
 
 // For routes that can be accessed for anyone
-Route::middleware('guest')->group(function () {
-    Route::get('/', [GuestController::class, 'Home'])->name('home');
-    Route::get('/gallery', [GuestController::class, 'Gallery'])->name('gallery');
-    Route::get('/contact', [GuestController::class, 'Contact'])->name('contact');
-    Route::get('/about/get-members/{period}', [GuestController::class, 'GetMembers'])->name('get-members');
-    Route::get('/about', [GuestController::class, 'About'])->name('about');
-});
+Route::get('/', [GuestController::class, 'Home'])->name('home');
+Route::get('/gallery', [GuestController::class, 'Gallery'])->name('gallery');
+Route::get('/contact', [GuestController::class, 'Contact'])->name('contact');
+Route::get('/about/get-members/{period}', [GuestController::class, 'GetMembers'])->name('get-members');
+Route::get('/about', [GuestController::class, 'About'])->name('about');
+Route::get('/news', [GuestController::class, 'News'])->name('news');
 
 // For routes that can only be accessed by Editor or Admin
 Route::middleware('loginAuth')->group(function(){
@@ -49,15 +49,6 @@ Route::middleware('adminAuth')->group(function(){
     Route::get('auth/test-admin', function(Request $request){
     }); 
 });
-
-Route::get('/news', function () {
-    return Inertia::render('News');
-})->name('news');
-
-Route::get('/news/{slug}', function ($slug) {
-    // Kita kirim $slug ke komponen React agar bisa dipakai (nanti buat fetch data)
-    return Inertia::render('NewsDetail', ['slug' => $slug]);
-})->name('news.detail');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -115,4 +106,11 @@ Route::name('management-details.')->prefix('management-details')->group(function
     Route::put('update/{management_detail}', [ManagementManage::class, 'detail_update'])->name('update');
     Route::delete('destroy/{management_detail}', [ManagementManage::class, 'detail_destroy'])->name('destroy');
 });
+
+Route::prefix('news')->name('news.')->group(function () {
+    Route::get('/tumbnail/{news_component}', [NewsController::class, 'getTumbnailPublic'])->name('tumbnail');
+    Route::get('/news/{news}', [NewsController::class, 'viewDetail'])->name('detail');
+    Route::get('/news/image/{news_component}', [NewsController::class, 'getImage'])->name('image');
+});
+
 require __DIR__.'/auth.php';

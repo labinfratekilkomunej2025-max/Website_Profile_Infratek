@@ -9,22 +9,22 @@ use App\Models\News;
 use App\Models\Gallery;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+
 
 class GuestController extends Controller
 {
     function Home(Request $request)
     {
-        // 'title',
-        // 'created_by_id',
-        // 'created_at',
-        // 'edited_at',
-        // 'is_public',
-        $news = News::select(['title', 'created_by_id as creator', 'created_at'])
+        $news = News::select(['id', 'title', 'description', 'created_at'])
             ->where('is_public', true)
+            ->with(['thumbnail:id,news_id'])
+            ->orderByDesc('created_at')
             ->take(3)
             ->get();
+        Log::info($news);
         return Inertia::render('Home', [
-            'news' => $news,
+            'latestNews' => $news,
         ]);
     }
     function Gallery(Request $request){
@@ -89,5 +89,25 @@ class GuestController extends Controller
             return $item->division_name;
         });
         return response()->json($grouped);
+    }
+    public function News()
+    {
+        $is_login = Auth::check();
+        if ($is_login){
+            $news = News::select(['id', 'title', 'description', 'created_at', 'created_by_id'])
+                ->with(['thumbnail:id,news_id', 'creator:id,name'])
+                ->orderByDesc('created_at')
+                ->paginate(9);
+        }else{
+            $news = News::select(['id', 'title', 'description', 'created_at', 'created_by_id'])
+                ->where('is_public', true)
+                ->with(['thumbnail:id,news_id'])
+                ->orderByDesc('created_at')
+                ->paginate(9);
+        }
+        
+        return Inertia::render('News',[
+            'news_payload' => $news,
+        ]);
     }
 }

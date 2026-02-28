@@ -6,13 +6,8 @@ import { PageProps as AppPageProps } from './';
 
 
 declare global {
-    interface AppConfig {
-        baseUrl: string;
-        storageUrl: string;
-    }
     interface Window {
         axios: AxiosInstance;
-        appConfig: AppConfig;
     }
 
     /* eslint-disable no-var */

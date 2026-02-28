@@ -1,5 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
+import {NewsGuest} from '@/SharedType';
+import {getLocalTime} from '@/Utils';
+
+
 
 // --- Komponen Bantuan Ikon SVG ---
 const ArrowIcon = () => (
@@ -13,32 +17,13 @@ const FocusIcons = [
   <svg className="w-8 h-8 text-blue-300 mb-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
 ];
 
-export default function Home() {
-  // DATA DUMMY: 3 Berita Terbaru untuk Widget
-  const latestNews = [
-    {
-      id: 1,
-      title: "Kegiatan Pelatihan Jaringan Komputer Dasar",
-      date: "12 Februari 2026",
-      thumbnail: "/assets/images/gallery/1.jpg",
-      slug: "pelatihan-jarkom-dasar"
-    },
-    {
-      id: 2,
-      title: "Kunjungan Industri ke Data Center Surabaya",
-      date: "10 Februari 2026",
-      thumbnail: "/assets/images/gallery/2.jpg",
-      slug: "kunjungan-industri-data-center"
-    },
-    {
-      id: 3,
-      title: "Update Perangkat Keras Laboratorium 2026",
-      date: "05 Januari 2026",
-      thumbnail: "/assets/images/gallery/3.jpg",
-      slug: "update-hardware-2026"
-    }
-  ];
+type Props = {
+  latestNews: NewsGuest[]
+}
 
+export default function Home(
+  {latestNews}: Props
+) {
   return (
     <MainLayout>
       <Head title="Home - Lab Infratek" />
@@ -183,12 +168,12 @@ export default function Home() {
                 <div key={news.id} style={{ animation: `fadeInUp 0.8s ease-out ${0.2 * (idx+1)}s both` }} className="group bg-white rounded-3xl shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-slate-100 flex flex-col">
                   {/* Thumbnail Container */}
                   <div className="relative h-56 overflow-hidden bg-slate-200">
-                    <img 
-                      src={news.thumbnail} 
+                    {<img 
+                      src={news.thumbnail!=null ? route('news.tumbnail', news.thumbnail.id) : 'https://placehold.co/600x400/e2e8f0/475569?text=Image+Not+Found'} 
                       alt={news.title} 
                       className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                       onError={(e) => { e.target.src = 'https://placehold.co/600x400/e2e8f0/475569?text=Image+Not+Found' }} // Fallback if image breaks
-                    />
+                    />}
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-blue-600 text-xs font-black px-3 py-1.5 rounded-full shadow-sm">
                       TERBARU
                     </div>
@@ -198,17 +183,25 @@ export default function Home() {
                   <div className="p-8 flex flex-col flex-grow">
                     <div className="flex items-center gap-2 mb-3">
                       <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                      <p className="text-sm text-slate-500 font-medium">{news.date}</p>
+                      <p className="text-sm text-slate-500 font-medium">{getLocalTime(news.created_at, true)}</p>
                     </div>
                     <h3 className="text-xl font-bold text-slate-800 mb-4 line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug">
-                      <Link href={`/news/${news.slug}`}>
+                      <Link href={route('news.detail', {
+                        news:news.id,
+                        from: window.location.href,
+                      })}>
                         {news.title}
                       </Link>
                     </h3>
-                    
+                    <p className="text-slate-500 text-sm mb-6 line-clamp-3 leading-relaxed">
+                      {news.description}
+                    </p>
                     <div className="mt-auto pt-4 border-t border-slate-50">
                       <Link 
-                        href={`/news/${news.slug}`}
+                        href={route('news.detail', {
+                        news:news.id,
+                        from: window.location.href,
+                      })}
                         className="inline-flex items-center text-sm font-bold text-blue-600 group-hover:text-indigo-600 transition-colors group/link"
                       >
                         Baca selengkapnya

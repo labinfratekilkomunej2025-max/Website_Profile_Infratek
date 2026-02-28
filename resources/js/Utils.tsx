@@ -49,4 +49,7 @@ function escapeHtml (input_string: any) {
     return entityMap[s];
   });
 }
+
+
+
 export { getLocalTime, escapeHtml };
