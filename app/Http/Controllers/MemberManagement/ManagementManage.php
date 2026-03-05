@@ -14,18 +14,32 @@ use App\Models\ManagementDetail;
 
 class ManagementManage extends Controller
 {
-    public function index_per_pos(Request $request) : Response
+    public function managements()
     {
-        $positions = Position::all();
-        $periods = Period::all();
-        $divisions = Division::all();
-        return Inertia::render('Management/PositionPeriodPage', [
-            'positions' => $positions, 
-            'periods' => $periods,
-            'divisions' => $divisions,
+        return Inertia::render('Management/ManageIndex');
+    }
+    public function positionsIndex()
+    {
+        $positions = Position::with('division:id,name')->orderBy('name')->paginate(8);
+        return Inertia::render('Management/PositionManage', [
+            'positions_payload' => $positions, 
+            'divisions' => Division::orderBy('name')->get(),
         ]);
     }
-
+    public function divisionsIndex()
+    {
+        $divisions = Division::orderBy('name')->paginate(8);
+        return Inertia::render('Management/DivisionManage', [
+            'divisions_payload' => $divisions, 
+        ]);
+    }
+    public function periodsIndex()
+    {
+        $periods = Period::orderBy('title')->paginate(8);
+        return Inertia::render('Management/PeriodManage', [
+            'periods_payload' => $periods, 
+        ]);
+    }
     public function get_all_management_member(){
         $excluded_pos = ["Kepala Laboratorium", "Pranata Laboratorium"];
         $member_pos = Position::has('members')->whereNotIn('name', $excluded_pos)->with(['members', 'members.management_detail'])->get();

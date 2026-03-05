@@ -22,23 +22,44 @@ class GuestController extends Controller
             ->orderByDesc('created_at')
             ->take(3)
             ->get();
-        Log::info($news);
-        return Inertia::render('Home', [
-            'latestNews' => $news,
-        ]);
+        $user = Auth::user();
+        if ($user==null){
+            return Inertia::render('Home', [
+                'latestNews' => $news,
+            ]);
+        }
+        if ($user->is_admin){
+            return redirect(route('users.index'));
+        }else{
+            return redirect(route('news'));
+        }
     }
     function Gallery(Request $request){
-        $galleries = Gallery::select([
+        $is_login = Auth::check();
+        if ($is_login){
+            $galleries = Gallery::select([
                 'id',
-                'title',
-                'description',
-                'created_at',
-            ])->where('is_public', true)
-            ->orderByDesc('created_at')
-            ->paginate(9);
-        return Inertia::render('gallery/page', [
-            'galleries_payload' => $galleries,
-        ]);
+                    'title',
+                    'description',
+                    'created_at',
+                ])->orderByDesc('created_at')
+                ->paginate(9);
+            return Inertia::render('Management/Gallery',[
+                'galleries_payload' => $galleries,
+            ]);
+        }else{
+            $galleries = Gallery::select([
+                    'id',
+                    'title',
+                    'description',
+                    'created_at',
+                ])->where('is_public', true)
+                ->orderByDesc('created_at')
+                ->paginate(9);
+                return Inertia::render('gallery/page', [
+                'galleries_payload' => $galleries,
+            ]);
+        }
     }
     function Contact(Request $request){
         return Inertia::render('contact/page');
@@ -98,16 +119,18 @@ class GuestController extends Controller
                 ->with(['thumbnail:id,news_id', 'creator:id,name'])
                 ->orderByDesc('created_at')
                 ->paginate(9);
+            return Inertia::render('Management/News',[
+                'news_payload' => $news,
+            ]);
         }else{
             $news = News::select(['id', 'title', 'description', 'created_at', 'created_by_id'])
                 ->where('is_public', true)
                 ->with(['thumbnail:id,news_id'])
                 ->orderByDesc('created_at')
                 ->paginate(9);
-        }
-        
-        return Inertia::render('News',[
+            return Inertia::render('News',[
             'news_payload' => $news,
         ]);
+        }
     }
 }

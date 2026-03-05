@@ -10,76 +10,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
+use Carbon\Carbon;
 
 class GalleryController extends Controller
 {
-    /**
-     * Display a listing of galleries.
-     * 
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function index(Request $request)
+    private function lastEdited(Gallery $gallery)
     {
-        // Query builder
-        $query = Gallery::with(['images', 'editor']);
-
-        // Filter by is_public jika ada parameter
-        if ($request->has('is_public')) {
-            $query->where('is_public', $request->is_public);
-        }
-
-        // Untuk public view, hanya tampilkan yang is_public = true
-        if ($request->has('public_only') && $request->public_only == true) {
-            $query->where('is_public', true);
-        }
-
-        // Pagination
-        $perPage = $request->get('per_page', 10);
-        $galleries = $query->latest('created_at')->paginate($perPage);
-
-        // Add image URLs to each gallery
-        $galleries->getCollection()->transform(function ($gallery) {
-            $gallery->images->transform(function ($image) use ($gallery) {
-                $image->image_url = route('galleries.image', ['gallery' => $gallery->id, 'image' => $image->id]);
-                return $image;
-            });
-            return $gallery;
-        });
-
-        return response()->json([
-            'success' => true,
-            'data' => $galleries
-        ], 200);
-    }
-
-    /**
-     * Display the specified gallery.
-     * 
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function show($id)
-    {
-        $gallery = Gallery::with(['images', 'editor'])->find($id);
-
-        if (!$gallery) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gallery not found'
-            ], 404);
-        }
-
-        // Add image URLs
-        $gallery->images->transform(function ($image) use ($gallery) {
-            $image->image_url = route('galleries.image', ['gallery' => $gallery->id, 'image' => $image->id]);
-            return $image;
-        });
-
-        return response()->json([
-            'success' => true,
-            'data' => $gallery
-        ], 200);
+        $gallery->edited_by_id = Auth::id();
+        $gallery->edited_at=Carbon::now();
+        $gallery->save();
     }
 
     /**
@@ -93,13 +33,11 @@ class GalleryController extends Controller
         // Validasi input
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'is_public' => 'boolean',
+            'description' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
+            return back()->with([
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -113,22 +51,19 @@ class GalleryController extends Controller
                 'description' => $request->description,
                 'is_public' => $request->is_public ?? false,
                 'edited_by_id' => Auth::id(),
+                'created_at'=>Carbon::now(),
             ]);
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Gallery created successfully',
-                'data' => $gallery->load('images')
-            ], 201);
+            return redirect(route('galleries.manage', $gallery->id))->with([
+                'success' => 'Created Gallery Succesfully',
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create gallery',
-                'error' => $e->getMessage()
+            return back()->with([
+                'error' => 'Failed to create gallery' . $e->getMessage()
             ], 500);
         }
     }
@@ -142,6 +77,7 @@ class GalleryController extends Controller
      */
     public function update(Request $request, $id)
     {
+        
         $gallery = Gallery::find($id);
 
         if (!$gallery) {
@@ -155,12 +91,10 @@ class GalleryController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'string|max:255',
             'description' => 'string',
-            'is_public' => 'boolean',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
+            return back()->with([
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -169,21 +103,20 @@ class GalleryController extends Controller
             $gallery->update([
                 'title' => $request->title ?? $gallery->title,
                 'description' => $request->description ?? $gallery->description,
-                'is_public' => $request->is_public ?? $gallery->is_public,
                 'edited_by_id' => Auth::id(),
+                'edited_at'=>Carbon::now(),
             ]);
 
-            return response()->json([
-                'success' => true,
+            return back()->with([
+                'success' => 'Gallery updated successfully',
                 'message' => 'Gallery updated successfully',
                 'data' => $gallery->fresh()->load('images')
             ], 200);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
+            return back()->with([
                 'message' => 'Failed to update gallery',
-                'error' => $e->getMessage()
+                'error' =>'Failed to update gallery',
             ], 500);
         }
     }
@@ -199,31 +132,29 @@ class GalleryController extends Controller
         $gallery = Gallery::find($id);
 
         if (!$gallery) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gallery not found'
+            return back()->with([
+                // 'success' => false,
+                'error' => 'Gallery not found'
             ], 404);
         }
 
         try {
             $gallery->is_public = !$gallery->is_public;
-            $gallery->edited_by_id = Auth::id();
-            $gallery->save();
+            $this::lastEdited($gallery);
 
-            return response()->json([
-                'success' => true,
-                'message' => $gallery->is_public ? 'Gallery published' : 'Gallery unpublished',
-                'data' => [
-                    'id' => $gallery->id,
-                    'is_public' => $gallery->is_public
-                ]
+            return back()->with([
+                'success' => $gallery->is_public ? 'Gallery published' : 'Gallery unpublished',
+                // 'message' => $gallery->is_public ? 'Gallery published' : 'Gallery unpublished',
+                // 'data' => [
+                //     'id' => $gallery->id,
+                //     'is_public' => $gallery->is_public
+                // ]
             ], 200);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to toggle publish status',
-                'error' => $e->getMessage()
+            return back()->with([
+                'error' => 'Failed to toggle publish status',
+                // 'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -239,15 +170,14 @@ class GalleryController extends Controller
         $gallery = Gallery::find($id);
 
         if (!$gallery) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gallery not found'
+            return back()->with([
+                // 'success' => false,
+                'error' => 'Gallery not found'
             ], 404);
         }
 
         try {
             DB::beginTransaction();
-
             // Hapus semua gambar dari storage
             foreach ($gallery->images as $image) {
                 if ($image->image_path != null && Storage::disk('private_gallery_images')->exists($image->image_path)) {
@@ -259,18 +189,17 @@ class GalleryController extends Controller
             $gallery->delete();
 
             DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Gallery deleted successfully'
+            return redirect(route('gallery'))->with([
+                // 'success' => true,
+                'success' => 'Gallery deleted successfully'
             ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete gallery',
-                'error' => $e->getMessage()
+            return back()->with([
+                // 'success' => false,
+                // 'message' => 'Failed to delete gallery',
+                'error' => 'Failed to delete gallery'.$e->getMessage()
             ], 500);
         }
     }
@@ -288,8 +217,8 @@ class GalleryController extends Controller
 
         if (!$gallery) {
             return response()->json([
-                'success' => false,
-                'message' => 'Gallery not found'
+                // 'success' => false,
+                'error' => 'Gallery not found'
             ], 404);
         }
 
@@ -301,7 +230,7 @@ class GalleryController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false,
+                // 'success' => false,
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -321,25 +250,28 @@ class GalleryController extends Controller
                     'image_path' => $path
                 ]);
 
-                // Add image URL
-                $galleryImage->image_url = route('galleries.image', ['gallery' => $galleryId, 'image' => $galleryImage->id]);
+                // Add image URL, Use Path Instead
+                $galleryImage->image_path = $path;
+                $galleryImage->save();
                 $uploadedImages[] = $galleryImage;
             }
-
+            $this::lastEdited($gallery);
             DB::commit();
 
             return response()->json([
-                'success' => true,
-                'message' => count($uploadedImages) . ' images uploaded successfully',
-                'data' => $uploadedImages
+                // 'success' => true,
+                'success' => count($uploadedImages) . ' images uploaded successfully',
+                // 'data' => $uploadedImages
+                'edited_at' => $gallery->edited_at,
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::info($e->getMessage());
             return response()->json([
-                'success' => false,
-                'message' => 'Failed to upload images',
-                'error' => $e->getMessage()
+                // 'success' => false,
+                // 'error' => ,
+                'error' => 'Failed to upload images' . $e->getMessage()
             ], 500);
         }
     }
@@ -357,8 +289,8 @@ class GalleryController extends Controller
 
         if (!$gallery) {
             return response()->json([
-                'success' => false,
-                'message' => 'Gallery not found'
+                // 'success' => false,
+                'error' => 'Gallery not found'
             ], 404);
         }
 
@@ -368,8 +300,8 @@ class GalleryController extends Controller
 
         if (!$image) {
             return response()->json([
-                'success' => false,
-                'message' => 'Image not found in this gallery'
+                // 'success' => false,
+                'error' => 'Image not found in this gallery'
             ], 404);
         }
 
@@ -383,20 +315,18 @@ class GalleryController extends Controller
 
             // Hapus record dari database
             $image->delete();
-
+            $this::lastEdited($gallery);
             DB::commit();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Image deleted successfully'
+                'success' => 'Image deleted successfully',
+                'edited_at' => $gallery->edited_at,
             ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete image',
-                'error' => $e->getMessage()
+                'error' => 'Failed to delete image' . $e->getMessage()
             ], 500);
         }
     }
@@ -450,6 +380,18 @@ class GalleryController extends Controller
                 'error' => 'There is No Image on This Gallery'
             ]);
         }
+        return response()->json($images);
+    }
+    public function manage(Gallery $gallery)
+    {
+        Log::info($gallery->load('editor:id,name'));
+        return Inertia::render('Management/GalleryManage', [
+            'gallery_payload' => $gallery->load('editor:id,name'),
+        ]);
+    }
+    public function getImagesId(Gallery $gallery)
+    {
+        $images = $gallery->images()->pluck('id');
         return response()->json($images);
     }
 }

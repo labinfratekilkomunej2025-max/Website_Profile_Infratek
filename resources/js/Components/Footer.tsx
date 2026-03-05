@@ -264,22 +264,54 @@ export default function Footer() {
             © 2025 INFRATEK. All rights reserved.
           </p>
           <div className="flex gap-4">
-            {["Facebook", "Twitter", "Instagram"].map((social) => (
-              <button
-                key={social}
-                className="bg-blue-500/20 hover:bg-blue-500/40 p-2 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/50"
-                aria-label={social}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
+  
+              {/* Facebook */}
+              <a href="https://www.example.com" target="_blank" rel="noopener noreferrer">
+                <button
+                  className="bg-blue-500/20 hover:bg-blue-500/40 p-2 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/50"
+                  aria-label="Facebook"
                 >
-                  <circle cx="12" cy="12" r="10" />
-                </svg>
-              </button>
-            ))}
-          </div>
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M22 12.07C22 6.48 17.52 2 11.93 2S2 6.48 2 12.07c0 4.99 3.66 9.13 8.44 9.88v-6.99H7.9v-2.89h2.54V9.41c0-2.5 1.49-3.89 3.78-3.89 1.1 0 2.25.2 2.25.2v2.48h-1.27c-1.25 0-1.64.78-1.64 1.57v1.88h2.8l-.45 2.89h-2.35v6.99C18.34 21.2 22 17.06 22 12.07z"/>
+                  </svg>
+                </button>
+              </a>
+
+              {/* Twitter / X */}
+              <a href="https://www.example.com" target="_blank" rel="noopener noreferrer">
+                <button
+                  className="bg-blue-500/20 hover:bg-blue-500/40 p-2 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/50"
+                  aria-label="Twitter"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M18.901 1.153h3.68l-8.04 9.19 9.46 12.504h-7.406l-5.8-7.584-6.63 7.584H.484l8.6-9.83L0 1.154h7.594l5.24 6.894 6.067-6.895z"/>
+                  </svg>
+                </button>
+              </a>
+              {/* Instagram */}
+              <a href="https://www.example.com" target="_blank" rel="noopener noreferrer">
+                <button
+                  className="bg-blue-500/20 hover:bg-blue-500/40 p-2 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/50"
+                  aria-label="Instagram"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M7.75 2C4.57 2 2 4.57 2 7.75v8.5C2 19.43 4.57 22 7.75 22h8.5C19.43 22 22 19.43 22 16.25v-8.5C22 4.57 19.43 2 16.25 2h-8.5zm0 2h8.5A3.75 3.75 0 0 1 20 7.75v8.5A3.75 3.75 0 0 1 16.25 20h-8.5A3.75 3.75 0 0 1 4 16.25v-8.5A3.75 3.75 0 0 1 7.75 4zm4.25 2.5A5.5 5.5 0 1 0 17.5 12 5.51 5.51 0 0 0 12 6.5zm0 2A3.5 3.5 0 1 1 8.5 12 3.5 3.5 0 0 1 12 8.5zm5.75-2.38a1.12 1.12 0 1 0 1.12 1.12 1.12 1.12 0 0 0-1.12-1.12z"/>
+                  </svg>
+                </button>
+              </a>
+            </div>
         </div>
       </div>
 

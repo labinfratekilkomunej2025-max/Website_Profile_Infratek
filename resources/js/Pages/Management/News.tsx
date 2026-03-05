@@ -1,8 +1,9 @@
-import { Link, Head, router } from '@inertiajs/react';
-import MainLayout from '@/Layouts/MainLayout';
+import { Link, Head, router, usePage } from '@inertiajs/react';
+import ManageLayout from '@/Layouts/ManagementLayout';
 import {NewsGuest} from '@/SharedType';
 import {getLocalTime} from '@/Utils';
 import { PaginationData } from "@/SharedType";
+import { useEffect, useState } from 'react';
 
 type NewsForAll = NewsGuest & {
     creator: NewsCreator;
@@ -10,6 +11,11 @@ type NewsForAll = NewsGuest & {
 type NewsCreator = {
     id: number;
     name: string;
+}
+
+type NewsForm = {
+  title: string;
+  description: string;
 }
 
 type Props = PaginationData & {
@@ -24,6 +30,34 @@ const ArrowIcon = () => (
 export default function News(
   {news_payload} : NewsPayload
 ) {
+  const { props } = usePage<any>();
+  const flash = props.flash;
+  const [visible, setVisible] = useState(true);
+  const Alert = ( type: 'success'|'error', message: string ) => {
+      const base = "absolute top-20 z-10 left-1/2 -translate-x-1/2 w-full max-w-md flex justify-between px-4 py-3 rounded shadow-lg";
+
+      const styles: Record<string, string> = {
+          'success': "flex inline-flex justify-between bg-teal-100 border border-teal-400 text-teal-700 px-4 py-3 my-2 rounded",
+          'error': "flex inline-flex justify-between bg-red-100 border border-red-400 text-red-700 px-4 py-3 my-2 rounded"
+      };
+
+      return (
+          <div className={`${base} ${styles[type]}`} role="alert">
+              <span className="block sm:inline pl-2">
+                  <strong className="font-bold">Success</strong>
+                  {message}
+              </span>
+              <span className="inline" onClick={() => setVisible(false)}>
+                  <svg className="fill-current h-6 w-6" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <title>Close</title>
+                      <path
+                          d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                  </svg>
+              </span>
+          </div>
+      );
+      };
+
   const news = news_payload.data
 
   const currentPage = news_payload.current_page;
@@ -52,8 +86,54 @@ export default function News(
       });
   };
 
+  const [showForm, setShowForm] = useState(false);
+    const [form, setForm] = useState<NewsForm>({
+        title: "",
+        description: "",
+    });
+
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        setForm({
+        ...form,
+        [e.target.name]: e.target.value,
+        });
+    };
+
+  useEffect(() => {
+      if (showForm) {
+          document.body.style.overflow = "hidden";
+      } else {
+          document.body.style.overflow = "auto";
+      }
+
+      return () => {
+          document.body.style.overflow = "auto";
+      };
+  }, [showForm]);
+  const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (!form.title || !form.description) {
+      alert("Semua field wajib diisi");
+      return;
+      }
+
+      if (form.title.length > 255 || form.description.length > 255) {
+      alert("Maksimal 255 karakter");
+      return;
+      }
+
+      router.post(route('news.store'), form);
+
+      // reset form
+      setForm({ title: "", description: "" });
+      setShowForm(false);
+  };
+
   return (
-    <MainLayout>
+    <ManageLayout>
       <Head title="Berita & Artikel - Lab Infratek" />
 
       {/* INJEKSI CSS ANIMASI */}
@@ -68,7 +148,8 @@ export default function News(
       `}</style>
 
       <div className="min-h-screen bg-slate-50 font-sans pb-24">
-        
+        {flash?.success && visible && (Alert('success', flash.success))}
+        {flash?.error && visible && (Alert('error', flash.error))}
         {/* Header Section */}
         <section className="relative pt-32 pb-20 px-6 overflow-hidden bg-white border-b border-slate-100">
           <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px]"></div>
@@ -140,10 +221,22 @@ export default function News(
                     Baca selengkapnya
                     <ArrowIcon />
                   </Link>
+                  <button
+                    onClick={() =>  router.get(route('news.manage', news.id))}
+                    className="px-4 h-12 rounded-2xl bg-blue-500 text-white shadow-sm hover:bg-blue-600 transition"
+                  >
+                    Kelola Berita
+                  </button>
                 </div>
                 </div>
               </div>
             ))}
+            <button
+                onClick={() => setShowForm(true)}
+                className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white text-2xl rounded-full shadow-lg hover:bg-blue-700 z-50"
+            >
+                +
+            </button>
           </div>
 
           {/* Pagination Modern */}
@@ -231,8 +324,63 @@ export default function News(
                 Page {currentPage} of {lastPage}
             </span>
         </div>
+        {/* Form */}
+        {showForm && (
+            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+                <form
+                    onSubmit={handleSubmit}
+                    className="bg-white w-full max-w-md p-6 rounded-xl shadow-xl"
+                >
+                    <h2 className="text-xl font-bold mb-4">Tambah Gallery</h2>
+
+                    <div className="mb-4">
+                        <label className="block font-semibold mb-1">Title</label>
+                        <input
+                            type="text"
+                            name="title"
+                            maxLength={255}
+                            value={form.title}
+                            onChange={handleChange}
+                            className="w-full border rounded-lg p-2"
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block font-semibold mb-1">Description</label>
+                        <textarea
+                            name="description"
+                            maxLength={255}
+                            value={form.description}
+                            onChange={handleChange}
+                            className="w-full border rounded-lg p-2"
+                            required
+                        />
+                    </div>
+
+                    <div className="flex gap-2 justify-end">
+                        <button
+                            type="button"
+                            onClick={() => setShowForm(false)}
+                            className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500"
+                        >
+                            Batal
+                        </button>
+
+                        <button
+                            type="submit"
+                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                        >
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        )}
         </section>
       </div>
-    </MainLayout>
+    </ManageLayout>
   );
 }

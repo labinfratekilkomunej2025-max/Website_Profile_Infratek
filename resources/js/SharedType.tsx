@@ -1,7 +1,7 @@
 type NewsGuest = {
     id: number;
     title: string;
-    description: string;
+    description: string | null;
     created_at: string;
     thumbnail: Thumbnail;
 }
