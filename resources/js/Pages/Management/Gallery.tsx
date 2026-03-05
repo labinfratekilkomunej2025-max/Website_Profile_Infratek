@@ -1,9 +1,9 @@
 import { useState, useEffect} from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import MainLayout from '@/Layouts/MainLayout';
 import axios from 'axios';
 import { getLocalTime } from "@/Utils";
 import { PaginationData } from "@/SharedType";
+import ManageLayout from '@/Layouts/ManagementLayout';
 
 type Gallery = {
     id: number;
@@ -11,6 +11,12 @@ type Gallery = {
     description: string;
     created_at: string;
 }
+
+type GalleryForm = {
+  title: string;
+  description: string;
+}
+
 
 type Image = {
     id: number|null,
@@ -33,7 +39,7 @@ export default function Gallery(
     const flash = props.flash;
     const [visible, setVisible] = useState(true);
     const Alert = ( type: 'success'|'error', message: string ) => {
-        const base = "absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-md flex justify-between px-4 py-3 rounded shadow-lg";
+        const base = "absolute top-4 z-10 left-1/2 -translate-x-1/2 w-full max-w-md flex justify-between px-4 py-3 rounded shadow-lg";
 
         const styles: Record<string, string> = {
             'success': "flex inline-flex justify-between bg-teal-100 border border-teal-400 text-teal-700 px-4 py-3 my-2 rounded",
@@ -171,6 +177,12 @@ export default function Gallery(
                                 <p className="text-sm text-slate-300 font-medium line-clamp-2 leading-relaxed">{getLocalTime(item.created_at, true)}</p>
                                 <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed">{item.description}</p>
                             </div>
+                            <button
+                                onClick={() =>  router.get(route('galleries.manage', item.id))}
+                                className="w-full px-4 h-12 rounded-2xl bg-blue-500 text-white shadow-sm hover:bg-blue-600 transition"
+                            >
+                                Kelola Berita
+                            </button>
                         </div>
                     </div>
                 ))}
@@ -230,8 +242,54 @@ export default function Gallery(
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, nextImage, prevImage]);
 
+    const [showForm, setShowForm] = useState(false);
+    const [form, setForm] = useState<GalleryForm>({
+        title: "",
+        description: "",
+    });
+
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        setForm({
+        ...form,
+        [e.target.name]: e.target.value,
+        });
+    };
+
+    useEffect(() => {
+        if (showForm) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [showForm]);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!form.title || !form.description) {
+        alert("Semua field wajib diisi");
+        return;
+        }
+
+        if (form.title.length > 255 || form.description.length > 255) {
+        alert("Maksimal 255 karakter");
+        return;
+        }
+
+        router.post(route('galleries.store'), form);
+
+        // reset form
+        setForm({ title: "", description: "" });
+        setShowForm(false);
+    };
+
     return (
-        <MainLayout>
+        <ManageLayout>
             <Head title="Gallery - Lab Infratek" />
 
             <style>{`
@@ -353,7 +411,12 @@ export default function Gallery(
                             Page {currentPage} of {lastPage}
                         </span>
                     </div>
-                    
+                    <button
+                        onClick={() => setShowForm(true)}
+                        className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white text-2xl rounded-full shadow-lg hover:bg-blue-700 z-50"
+                    >
+                        +
+                    </button>
                 </section>
 
                 {/* --- LIGHTBOX (MODERN POPUP) --- */}
@@ -413,6 +476,61 @@ export default function Gallery(
                     </div>
                 )}
             </div>
-        </MainLayout>
+            {/* Form */}
+            {showForm && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+                    <form
+                        onSubmit={handleSubmit}
+                        className="bg-white w-full max-w-md p-6 rounded-xl shadow-xl"
+                    >
+                        <h2 className="text-xl font-bold mb-4">Tambah Gallery</h2>
+
+                        <div className="mb-4">
+                            <label className="block font-semibold mb-1">Title</label>
+                            <input
+                                type="text"
+                                name="title"
+                                maxLength={255}
+                                value={form.title}
+                                onChange={handleChange}
+                                className="w-full border rounded-lg p-2"
+                                required
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block font-semibold mb-1">Description</label>
+                            <textarea
+                                name="description"
+                                maxLength={255}
+                                value={form.description}
+                                onChange={handleChange}
+                                className="w-full border rounded-lg p-2"
+                                required
+                            />
+                        </div>
+
+                        <div className="flex gap-2 justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setShowForm(false)}
+                                className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500"
+                            >
+                                Batal
+                            </button>
+
+                            <button
+                                type="submit"
+                                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                            >
+                                Simpan
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            )}
+        </ManageLayout>
     );
 }

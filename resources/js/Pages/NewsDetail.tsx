@@ -4,11 +4,6 @@ import {NewsGuest} from '@/SharedType';
 import { getLocalTime } from '@/Utils';
 import { PageProps } from '@/types';
 // Interface untuk tipe data konten dinamis
-interface NewsContent {
-    type: 'text' | 'image' | 'quote';
-    value: string;
-    caption?: string; // Hanya untuk image
-}
 type NewsComponent = {
     id: number;
     news_id: number;
@@ -37,18 +32,19 @@ export default function NewsDetail(
     {auth, news, prev_link} : Props
 ) {
     const news_components = news.news_components;
-    console.log(news);
+    console.log(news_components);
     console.log(auth.user);
-    const tumbnailIndex = news_components.findIndex((item:NewsComponent)=>{return item.is_tumbnail});
+     const index= news_components.findIndex((item:NewsComponent)=>{return item.is_tumbnail});
+     const tumbnailIndex = index!=-1 ? index : 0;
 
     return (
         <MainLayout>
             <Head title={`${news.title} - Lab Infratek`} />
 
-            <div className="min-h-screen bg-white">
+            {news_components.length!=0 ? (<div className="min-h-screen bg-white">
                 
                 {/* HERO SECTION - THUMBNAIL */}
-                <div className="relative h-[60vh] min-h-[400px]">
+                {news_components[tumbnailIndex]!=null && (<div className="relative h-[60vh] min-h-[400px]">
                     <div className="absolute inset-0">
                         <img 
                             src={route('news.image', news_components[tumbnailIndex].id)} 
@@ -75,7 +71,7 @@ export default function NewsDetail(
                             </div>)}
                         </div>
                     </div>
-                </div>
+                </div>)}
 
                 {/* CONTENT BODY */}
                 <div className="max-w-3xl mx-auto px-6 py-12">
@@ -147,7 +143,12 @@ export default function NewsDetail(
                     </div>
 
                 </div>
-            </div>
+            </div>)
+            : (
+                <div>
+                    Belum ada Data yang Ditambahkan
+                </div>
+            )}
         </MainLayout>
     );
 }

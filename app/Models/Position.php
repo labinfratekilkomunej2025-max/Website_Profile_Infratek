@@ -10,7 +10,8 @@ class Position extends Model
 {
     protected $fillable = [
         'name',
-        'division_id'
+        'division_id',
+        'order'
     ];
     public $timestamps = false;
     public function members():HasMany{

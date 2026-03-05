@@ -1,14 +1,23 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
-export default function Navbar() {
+
+
+export default function NavbarManagement() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
     // Konversi Next.js 'usePathname' ke Inertia 'usePage'
-    const { url } = usePage();
+    const { url, props } = usePage();
+    const user = props.auth.user;
     // Di Inertia url biasanya diawali '/', jadi sama dengan pathname di Next.js
     const pathname = url;
+    // users
+	// members
+	// news
+	// gallery
+	// visit
+	// profile
 
     useEffect(() => {
         const handleScroll = () => {
@@ -60,24 +69,48 @@ export default function Navbar() {
                     {/* Desktop Navigation Links */}
                     <div className="hidden md:flex items-center gap-8">
                         {/* HOME LINK */}
-                        <Link
-                            href={route('home')}
-                            className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
-                                isActive('/home')
-                                    ? 'text-blue-600'
-                                    : 'text-gray-700 hover:text-blue-600'
-                            }`}
-                        >
-                            <span className="relative z-10">Home</span>
-                            {isActive('/home') ? (
-                                <>
-                                    <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
-                                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
-                                </>
-                            ):(
-                                <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
-                            )}
-                        </Link>
+                        {user?.is_admin && (
+                        <>
+                            <Link
+                                href={route('users.index')}
+                                className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
+                                    isActive('/users')
+                                        ? 'text-blue-600'
+                                        : 'text-gray-700 hover:text-blue-600'
+                                }`}
+                            >
+                                <span className="relative z-10">Accounts</span>
+                                {isActive('/users') ? (
+                                    <>
+                                        <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
+                                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
+                                    </>
+                                ):(
+                                    <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
+                                )}
+                            </Link>
+                            {/* ABOUT LINK */}
+                            <Link
+                                href={route('managements.index')}
+                                className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
+                                    isActive('/members')
+                                        ? 'text-blue-600'
+                                        : 'text-gray-700 hover:text-blue-600'
+                                }`}
+                            >
+                                <span className="relative z-10">Members</span>
+                                {isActive('/members') ? (
+                                    <>
+                                        <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
+                                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
+                                    </>
+                                ):(
+                                    <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
+                                )}
+                            </Link>
+                        </>
+                    )}
+
 
                         {/* NEWS LINK */}
                         <Link
@@ -98,28 +131,6 @@ export default function Navbar() {
                                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
                             )}
                         </Link>
-
-                        {/* ABOUT LINK */}
-                        <Link
-                            href={route('about')}
-                            className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
-                                isActive('/about')
-                                    ? 'text-blue-600'
-                                    : 'text-gray-700 hover:text-blue-600'
-                            }`}
-                        >
-                            <span className="relative z-10">About</span>
-                            {isActive('/about') ? (
-                                <>
-                                    <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
-                                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
-                                </>
-                            ):(
-                                <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
-                            )}
-                        </Link>
-
-
 
                         {/* GALLERY LINK */}
                         <Link
@@ -143,35 +154,15 @@ export default function Navbar() {
 
                         {/* CONTACT LINK */}
                         <Link
-                            href={route('contact')}
+                            href={route('profile.edit')}
                             className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
-                                isActive('/contact')
+                                isActive('/profile')
                                     ? 'text-blue-600'
                                     : 'text-gray-700 hover:text-blue-600'
                             }`}
                         >
-                            <span className="relative z-10">Contact</span>
-                            {isActive('/contact') ? (
-                                <>
-                                    <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
-                                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
-                                </>
-                            ):(
-                                <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
-                            )}
-                        </Link>
-
-                        {/* CONTACT LOGIN */}
-                        <Link
-                            href={route('login')}
-                            className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
-                                isActive('/contact')
-                                    ? 'text-blue-600'
-                                    : 'text-gray-700 hover:text-blue-600'
-                            }`}
-                        >
-                            <span className="relative z-10">Login</span>
-                            {isActive('/login') ? (
+                            <span className="relative z-10">Profile</span>
+                            {isActive('/profile') ? (
                                 <>
                                     <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
                                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
@@ -216,17 +207,32 @@ export default function Navbar() {
                 {/* Mobile Menu */}
                 {isMobileMenuOpen && (
                     <div className="md:hidden mt-4 pb-4 space-y-2 animate-fade-in max-h-[30vh] overflow-y-auto">
-                        <Link
-                            href={route('home')}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                                isActive('/home')
-                                    ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
-                                    : 'text-gray-700 hover:bg-blue-50'
-                            }`}
-                        >
-                            Home
-                        </Link>
+                        { user?.is_admin && (
+                        <>
+                            <Link
+                                href={route('users.index')}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
+                                    isActive('/users')
+                                        ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
+                                        : 'text-gray-700 hover:bg-blue-50'
+                                }`}
+                            >
+                                Accounts
+                            </Link>
+                            <Link
+                                href={route('managements.index')}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
+                                    isActive('/members')
+                                        ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
+                                        : 'text-gray-700 hover:bg-blue-50'
+                                }`}
+                            >
+                                Members
+                            </Link>
+                        </>
+                        )}
                         <Link
                             href={route('news')}
                             onClick={() => setIsMobileMenuOpen(false)}
@@ -237,17 +243,6 @@ export default function Navbar() {
                             }`}
                         >
                             News
-                        </Link>
-                        <Link
-                            href={route('about')}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                                isActive('/about')
-                                    ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
-                                    : 'text-gray-700 hover:bg-blue-50'
-                            }`}
-                        >
-                            About
                         </Link>
                         <Link
                             href={route('gallery')}
@@ -261,26 +256,15 @@ export default function Navbar() {
                             Gallery
                         </Link>
                         <Link
-                            href={route('contact')}
+                            href={route('profile.edit')}
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                                isActive('/contact')
+                                isActive('/profile')
                                     ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
                                     : 'text-gray-700 hover:bg-blue-50'
                             }`}
                         >
-                            Contact
-                        </Link>
-                        <Link
-                            href={route('login')}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                                isActive('/login')
-                                    ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
-                                    : 'text-gray-700 hover:bg-blue-50'
-                            }`}
-                        >
-                            Login
+                            Profile
                         </Link>
                     </div>
                 )}

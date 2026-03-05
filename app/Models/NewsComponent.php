@@ -18,6 +18,7 @@ class NewsComponent extends Model
         'created_by_id',
         'alt_text',
     ];
+    public $timestamps = false;
     protected $casts = [
         'type' => NewsCompType::class,
     ];
@@ -25,8 +26,8 @@ class NewsComponent extends Model
     {
         return $this->belongsTo(News::class);
     }
-    public function user():BelongsTo
+    public function creator():BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by_id', 'id');
     }
 }

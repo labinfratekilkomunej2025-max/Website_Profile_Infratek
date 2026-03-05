@@ -16,13 +16,14 @@ class Gallery extends Model
         'created_at',
         'edited_at',
     ];
+    public $timestamps = false;
     protected $casts = [
         'created_at' => 'datetime',
         'edited_at' => 'datetime',
     ];
     public function editor():BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'edited_by_id', 'id');
     }
     public function images():HasMany
     {

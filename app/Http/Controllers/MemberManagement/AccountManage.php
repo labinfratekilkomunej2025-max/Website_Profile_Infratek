@@ -14,7 +14,7 @@ class AccountManage extends Controller
 {
     public function index(){
         return inertia('Management/AccountPage', [
-            'accounts' => User::all()
+            'accounts_payload' => User::paginate(10)
         ]);
     }
     public function destroy(User $user)

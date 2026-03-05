@@ -19,10 +19,11 @@ class MemberManage extends Controller
 {
     public function index_member()
     {
-        $members = Member::with(['management_detail', 'management_detail.period', 'management_detail.position', 'management_detail.position.division'])->get();
-        Log::info($members);
+        $members = Member::with(['management_detail', 'management_detail.period', 'management_detail.position', 'management_detail.position.division'])
+                ->orderBy('full_name')
+                ->paginate(10);
         return Inertia::render('Management/MemberPage', [
-            'members' => $members,
+            'members_payload' => $members,
         ]);
     }
 

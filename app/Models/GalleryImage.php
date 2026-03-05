@@ -12,6 +12,7 @@ class GalleryImage extends Model
         'uploaded_by_id',
         'image_path',
     ];
+    public $timestamps = false;
     public function gallery():BelongsTo
     {
         return $this->belongsTo(Gallery::class);
