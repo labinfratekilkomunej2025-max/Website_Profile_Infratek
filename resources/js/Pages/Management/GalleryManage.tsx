@@ -84,7 +84,6 @@ export default function GalleryDetail({gallery_payload}: Props) {
             var result = await axios.post(route('galleries.upload-images', gallery_payload.id), form, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
-            console.log(result);
             gallery_payload.edited_at = result.data.edited_at;
             fetchGallery();
         } catch (err) {

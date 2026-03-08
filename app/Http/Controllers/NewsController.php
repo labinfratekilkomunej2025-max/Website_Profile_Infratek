@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 
 class NewsController extends Controller
 {
@@ -26,10 +25,16 @@ class NewsController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
+            'images' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
         if ($validated['description']==null){
             $validated['description'] = $validated['title'];
         }   
+            
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('', 'private_news_images');
+        }
         $news = News::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
@@ -37,6 +42,7 @@ class NewsController extends Controller
             'edited_at'=>Carbon::now(),
             'edited_by_id' => Auth::id(),
             'is_public'=>false,
+            'image_path'=>$imagePath,
             'created_by_id' => Auth::id(),
         ]);
 
@@ -50,9 +56,16 @@ class NewsController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
+            'images' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
         if ($validated['description']==null){
             $validated['description'] = $validated['title'];
+        }
+        if ($request->hasFile('image')) {
+            if ($news->image_path != null && Storage::disk('private_news_images')->exists($news->image_path)){
+                Storage::disk('private_news_images')->delete($news->image_path);
+            }
+            $news->image_path = $request->file('image')->store('', 'private_news_images');
         }
         $news->title = $validated['title'];
         $news->description = $validated['description'];
@@ -98,7 +111,6 @@ class NewsController extends Controller
             'success' => 'Component created',
         ]);
     }
-
     // Update komponen
     public function update(Request $request, NewsComponent $component)
     {
@@ -156,6 +168,9 @@ class NewsController extends Controller
                 Storage::disk('private_news_images')->delete($image->image_path);
             }
         }
+        if ($news->image_path!=null && Storage::disk('private_news_images')->exists($news->image_path)){
+            Storage::disk('private_news_images')->delete($news->image_path);
+        }
         $news->delete();
         return redirect(route('news'))->with([
             'success' => 'News Deleted Succesfully'
@@ -189,12 +204,12 @@ class NewsController extends Controller
         ]);
     }
 
-    public function getTumbnailPublic(NewsComponent $news_component)
+    public function getTumbnailPublic(News $news)
     {
-        if (!$news_component->news->is_public){abort(401, 'Unauthorized access.');}
-        if ($news_component->image_path != null && Storage::disk('private_news_images')->exists($news_component->image_path))
+        if (!$news->is_public&&!Auth::check()){abort(401, 'Unauthorized access.');}
+        if ($news->image_path != null && Storage::disk('private_news_images')->exists($news->image_path))
         {
-            return Storage::disk('private_news_images')->response($news_component->image_path);
+            return Storage::disk('private_news_images')->response($news->image_path);
         }else{
             return redirect('https://placehold.co/600x400/e2e8f0/475569?text=Image+Not+Found');
         }

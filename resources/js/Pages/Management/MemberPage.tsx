@@ -48,7 +48,6 @@ export default function MembersPage({ members_payload }: Props) {
   const errors = props.errors;
   const flash = props.flash;
   const members: Member[]= members_payload.data;
-  console.log(members)
   const [positions, setPositions] = useState<Position[]>([]);
   const [periods, setPeriods] = useState<Period[]>([]);
 

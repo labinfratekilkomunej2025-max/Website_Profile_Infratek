@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Carbon\Carbon;
 
@@ -267,7 +266,6 @@ class GalleryController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::info($e->getMessage());
             return response()->json([
                 // 'success' => false,
                 // 'error' => ,
@@ -361,6 +359,11 @@ class GalleryController extends Controller
                 'error' => 'There is No Image on This Gallery'
             ]);
         }
+        if (!$images[0]->is_public&&!Auth::check()){
+            return response()->json([
+                'error' => 'Unauthorize'
+            ]);
+        }
         $image_path = $images[0]->image_path;
         if (!Storage::disk('private_gallery_images')->exists($image_path)){
             return response()->json([
@@ -384,7 +387,6 @@ class GalleryController extends Controller
     }
     public function manage(Gallery $gallery)
     {
-        Log::info($gallery->load('editor:id,name'));
         return Inertia::render('Management/GalleryManage', [
             'gallery_payload' => $gallery->load('editor:id,name'),
         ]);

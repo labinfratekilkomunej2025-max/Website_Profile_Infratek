@@ -8,7 +8,6 @@ use App\Models\Period;
 use App\Models\News;
 use App\Models\Gallery;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -18,7 +17,6 @@ class GuestController extends Controller
     {
         $news = News::select(['id', 'title', 'description', 'created_at'])
             ->where('is_public', true)
-            ->with(['thumbnail:id,news_id'])
             ->orderByDesc('created_at')
             ->take(3)
             ->get();
@@ -116,7 +114,7 @@ class GuestController extends Controller
         $is_login = Auth::check();
         if ($is_login){
             $news = News::select(['id', 'title', 'description', 'created_at', 'created_by_id'])
-                ->with(['thumbnail:id,news_id', 'creator:id,name'])
+                ->with(['creator:id,name'])
                 ->orderByDesc('created_at')
                 ->paginate(9);
             return Inertia::render('Management/News',[
@@ -125,7 +123,6 @@ class GuestController extends Controller
         }else{
             $news = News::select(['id', 'title', 'description', 'created_at', 'created_by_id'])
                 ->where('is_public', true)
-                ->with(['thumbnail:id,news_id'])
                 ->orderByDesc('created_at')
                 ->paginate(9);
             return Inertia::render('News',[

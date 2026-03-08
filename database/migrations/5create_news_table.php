@@ -15,6 +15,7 @@ return new class extends Migration
             $table->foreignId('created_by_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('edited_by_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('created_at')->useCurrent();
+            $table->string('image_path')->nullable();
             $table->timestamp('edited_at')->useCurrent()->useCurrentOnUpdate();
         });
     }

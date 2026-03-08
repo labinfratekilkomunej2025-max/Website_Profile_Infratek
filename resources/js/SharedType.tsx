@@ -3,11 +3,6 @@ type NewsGuest = {
     title: string;
     description: string | null;
     created_at: string;
-    thumbnail: Thumbnail;
-}
-type Thumbnail = {
-    id: number;
-    news_id: number;
 }
 type Link = {
     url: string|null;

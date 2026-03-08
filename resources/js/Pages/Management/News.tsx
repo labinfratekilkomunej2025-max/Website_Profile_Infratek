@@ -16,6 +16,7 @@ type NewsCreator = {
 type NewsForm = {
   title: string;
   description: string;
+  image: null | File;
 }
 
 type Props = PaginationData & {
@@ -32,6 +33,7 @@ export default function News(
 ) {
   const { props } = usePage<any>();
   const flash = props.flash;
+  const errors = props.errors;
   const [visible, setVisible] = useState(true);
   const Alert = ( type: 'success'|'error', message: string ) => {
       const base = "absolute top-20 z-10 left-1/2 -translate-x-1/2 w-full max-w-md flex justify-between px-4 py-3 rounded shadow-lg";
@@ -90,6 +92,7 @@ export default function News(
     const [form, setForm] = useState<NewsForm>({
         title: "",
         description: "",
+        image: null,
     });
 
     const handleChange = (
@@ -128,7 +131,7 @@ export default function News(
       router.post(route('news.store'), form);
 
       // reset form
-      setForm({ title: "", description: "" });
+      setForm({ title: "", description: "", image:null });
       setShowForm(false);
   };
 
@@ -175,7 +178,7 @@ export default function News(
                 {/* Thumbnail Container */}
                 <div className="relative h-56 overflow-hidden bg-slate-200">
                   {<img 
-                    src={news.thumbnail!=null ? route('news.tumbnail', news.thumbnail.id) : 'https://placehold.co/600x400/e2e8f0/475569?text=Image+Not+Found'} 
+                    src={route('news.tumbnail', news.id)} 
                     alt={news.title} 
                     loading="lazy"
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
@@ -335,6 +338,19 @@ export default function News(
                     <h2 className="text-xl font-bold mb-4">Tambah Gallery</h2>
 
                     <div className="mb-4">
+                        <label className="block font-semibold mb-1">Tumbnail</label>
+                        <input
+                        type="file"
+                        onChange={(e) =>
+                            setForm({
+                            ...form,
+                            image: e.target.files?.[0] ?? null,
+                            })
+                        }
+                        />
+                        {errors?.image && (
+                            <div className="text-red-500 text-xs mt-1">{errors.image}</div>
+                        )}
                         <label className="block font-semibold mb-1">Title</label>
                         <input
                             type="text"

@@ -12,7 +12,6 @@ use Inertia\Response;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 
 
 class MemberManage extends Controller
