@@ -169,7 +169,7 @@ export default function Home(
                   {/* Thumbnail Container */}
                   <div className="relative h-56 overflow-hidden bg-slate-200">
                     {<img 
-                      src={news.thumbnail!=null ? route('news.tumbnail', news.thumbnail.id) : 'https://placehold.co/600x400/e2e8f0/475569?text=Image+Not+Found'} 
+                      src={route('news.tumbnail', news.id)} 
                       alt={news.title} 
                       className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                       onError={(e) => { e.target.src = 'https://placehold.co/600x400/e2e8f0/475569?text=Image+Not+Found' }} // Fallback if image breaks

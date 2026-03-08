@@ -16,6 +16,7 @@ class News extends Model
         'created_by_id',
         'edited_by_id',
         'created_at',
+        'image_path',
         'edited_at',
         'is_public',
         'description',
@@ -40,7 +41,7 @@ class News extends Model
     }
     public function news_components():HasMany
     {
-        return $this->hasMany(NewsComponent::class, 'id','news_id')
+        return $this->hasMany(NewsComponent::class, 'news_id','id')
                     ->orderBy('order');
     }
     public function  images():HasMany

@@ -32,11 +32,7 @@ export default function NewsDetail(
     {auth, news, prev_link} : Props
 ) {
     const news_components = news.news_components;
-    console.log(news_components);
-    console.log(auth.user);
-     const index= news_components.findIndex((item:NewsComponent)=>{return item.is_tumbnail});
-     const tumbnailIndex = index!=-1 ? index : 0;
-
+    console.log(news)
     return (
         <MainLayout>
             <Head title={`${news.title} - Lab Infratek`} />
@@ -44,10 +40,10 @@ export default function NewsDetail(
             {news_components.length!=0 ? (<div className="min-h-screen bg-white">
                 
                 {/* HERO SECTION - THUMBNAIL */}
-                {news_components[tumbnailIndex]!=null && (<div className="relative h-[60vh] min-h-[400px]">
+                <div className="relative h-[60vh] min-h-[400px]">
                     <div className="absolute inset-0">
                         <img 
-                            src={route('news.image', news_components[tumbnailIndex].id)} 
+                            src={route('news.tumbnail', news.id)} 
                             alt={news.title} 
                             loading="lazy"
                             className="w-full h-full object-cover"
@@ -71,13 +67,13 @@ export default function NewsDetail(
                             </div>)}
                         </div>
                     </div>
-                </div>)}
+                </div>
 
                 {/* CONTENT BODY */}
                 <div className="max-w-3xl mx-auto px-6 py-12">
                     <article className="space-y-8">
                         {/* LOGIC RENDER: Loop isi konten sesuai urutan */}
-                        {news_components.slice(tumbnailIndex+1)?.map((block, index) => {
+                        {news_components?.map((block, index) => {
                             // Render Teks
                             if (block.type === 'text') {
                                 return (

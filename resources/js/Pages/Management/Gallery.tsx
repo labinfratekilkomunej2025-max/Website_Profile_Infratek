@@ -35,6 +35,7 @@ export default function Gallery(
         {galleries_payload, is_admin} : Props
     ) {
     var galleries = galleries_payload.data;
+    
     const { props } = usePage<any>();
     const flash = props.flash;
     const [visible, setVisible] = useState(true);
@@ -83,10 +84,6 @@ export default function Gallery(
     const [imageIdIndex, setImageIdIndex] = useState<number>(0);
     const [isAnimating, setIsAnimating] = useState(false);
     const [direction, setDirection] = useState<'next' | 'prev'>('next');
-
-    useEffect(()=>{
-        console.log(flash);
-    })
     const changeImage = async (id: number) => {
         try {
             const res = await axios.get(route("galleries.images", id));

@@ -33,7 +33,7 @@ Route::prefix('gallery')->name('galleries.')->group(function () {
 });
 
 Route::prefix('news')->name('news.')->group(function () {
-    Route::get('/tumbnail/{news_component}', [NewsController::class, 'getTumbnailPublic'])->name('tumbnail');
+    Route::get('/tumbnail/{news}', [NewsController::class, 'getTumbnailPublic'])->name('tumbnail');
     Route::get('/{news}', [NewsController::class, 'viewDetail'])->name('detail');
     Route::get('/image/{news_component}', [NewsController::class, 'getImage'])->name('image');
 });

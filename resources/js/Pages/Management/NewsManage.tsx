@@ -45,12 +45,14 @@ export default function NewsDetail({ news_payload }: Props) {
 
     const { props } = usePage<any>();
     const flash = props.flash;
+    const errors = props.errors;
     const [message, setMessage] = useState<string | null>(null);
     const [textColor, setTextColor] = useState("text");
 
     const [editForm, setEditForm] = useState({
         title: news.title,
         description: news.description,
+        image: null as null | File,
     });
     useEffect(() => {
         if (flash?.success) {
@@ -78,6 +80,7 @@ export default function NewsDetail({ news_payload }: Props) {
     // Update News
     // =========================
     const handleUpdateNews = async () => {
+        
         router.put(route('news.update', news.id), editForm)
 
         setNews({ ...news, ...editForm });
@@ -187,6 +190,14 @@ export default function NewsDetail({ news_payload }: Props) {
                         {message}
                         </div>
                     )}
+                    <img 
+                    src={route('news.tumbnail', news.id)} 
+                    alt={news.title} 
+                    loading="lazy"
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                    // @ts-ignore
+                    onError={(e) => { e.target.src = 'https://placehold.co/600x400/e2e8f0/475569?text=Image+Not+Found' }} // Fallback if image breaks
+                  />
                     <h1 className="text-4xl font-bold mb-4">{news.title}</h1>
                     <p className="text-gray-700 mb-4">{news.description}</p>
                     <p className="mb-4">
@@ -234,6 +245,18 @@ export default function NewsDetail({ news_payload }: Props) {
             ) : (
                 <>
                     <div className="space-y-4 mb-6">
+                        <input
+                        type="file"
+                        onChange={(e) =>
+                            setEditForm({
+                            ...editForm,
+                            image: e.target.files?.[0] ?? null,
+                            })
+                        }
+                        />
+                        {errors?.image && (
+                            <div className="text-red-500 text-xs mt-1">{errors.image}</div>
+                        )}
                         <input
                             value={editForm.title}
                             onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
