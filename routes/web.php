@@ -112,34 +112,4 @@ Route::middleware(['adminAuth'])->group(function(){
     });
 });
 
-
-
-// This using middleware of laravel auth
-Route::middleware('auth')->group(function () {
-});
-
-Route::get('/test/gallery', function () {
-    return view('test.gallery');
-})->name('test.gallery');
-// Route::get('/users', [UserController::class, 'get_all_editor'])->name('get_all_editor');
- 
-// Route::get('/managements/get-all', [ManagementManage::class, 'get_all_management_member'])->name('get_all_managements');
-// Route::get('/managements/per-pos', [ManagementManage::class, 'get_all_period_position'])->name('get_all_per_pos');
-
-
-
-
-// Route::prefix('news')->name('news.')->group(function () {
-//     Route::get('/tumbnail/{news_component}', [NewsController::class, 'getTumbnailPublic'])->name('tumbnail');
-//     Route::get('/{news}', [NewsController::class, 'viewDetail'])->name('detail');
-//     Route::get('/image/{news_component}', [NewsController::class, 'getImage'])->name('image');
-//     Route::get('/manage/{news}', [NewsController::class, 'manage'])->name('manage');
-//     Route::get('/manage/{news}/components', [NewsController::class, 'getNewsComponents'])->name('components');
-//     Route::post('store/component', [NewsController::class, 'store'])->name('store-component');
-//     Route::post('store', [NewsController::class, 'storeNews'])->name('store');
-//     Route::put('update/{news}', [NewsController::class, 'updateNews'])->name('update');
-//     Route::put('update/{component}', [NewsController::class, 'update'])->name('update-component');
-// });
-
-
 require __DIR__.'/auth.php';
