@@ -172,6 +172,7 @@ export default function Home(
                       src={route('news.tumbnail', news.id)} 
                       alt={news.title} 
                       className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                      // @ts-expect-error
                       onError={(e) => { e.target.src = 'https://placehold.co/600x400/e2e8f0/475569?text=Image+Not+Found' }} // Fallback if image breaks
                     />}
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-blue-600 text-xs font-black px-3 py-1.5 rounded-full shadow-sm">
