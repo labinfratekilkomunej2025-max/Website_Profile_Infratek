@@ -359,7 +359,7 @@ class GalleryController extends Controller
                 'error' => 'There is No Image on This Gallery'
             ]);
         }
-        if (!$images[0]->is_public&&!Auth::check()){
+        if (!$gallery->is_public&&!Auth::check()){
             return response()->json([
                 'error' => 'Unauthorize'
             ]);

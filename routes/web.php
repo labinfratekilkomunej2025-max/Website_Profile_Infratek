@@ -25,6 +25,7 @@ Route::get('/contact', [GuestController::class, 'Contact'])->name('contact');
 Route::get('/about/get-members/{period}', [GuestController::class, 'GetMembers'])->name('get-members');
 Route::get('/about', [GuestController::class, 'About'])->name('about');
 Route::get('/news', [GuestController::class, 'News'])->name('news');
+Route::get('members/photo/{member}', [MemberManage::class, 'photo'])->name('members.photo');
 
 Route::prefix('gallery')->name('galleries.')->group(function () {
     Route::get('/image/tumbnail/{gallery}', [GalleryController::class, 'image_tumbnail'])->name('image.tumbnail');
@@ -97,7 +98,6 @@ Route::middleware(['adminAuth'])->group(function(){
         Route::post('store', [MemberManage::class, 'store'])->name('store');
         Route::put('update', [MemberManage::class, 'update'])->name('update');
         Route::delete('destroy/{member}', [MemberManage::class, 'destroy'])->name('destroy');
-        Route::get('photo/{member}', [MemberManage::class, 'photo'])->name('photo');
     });
     Route::name('management-details.')->prefix('management-details')->group(function () {
         Route::post('store', [ManagementManage::class, 'detail_store'])->name('store');
