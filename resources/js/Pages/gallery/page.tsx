@@ -77,10 +77,6 @@ export default function Gallery(
     const [imageIdIndex, setImageIdIndex] = useState<number>(0);
     const [isAnimating, setIsAnimating] = useState(false);
     const [direction, setDirection] = useState<'next' | 'prev'>('next');
-
-    useEffect(()=>{
-        console.log(flash);
-    })
     const changeImage = async (id: number) => {
         try {
             const res = await axios.get(route("galleries.images", id));
@@ -88,7 +84,6 @@ export default function Gallery(
             setImageIdIndex(0)
             setIsOpen(true);
         } catch (err) {
-            console.error(err);
         }
     };
     const renderImageItem = (imgIndex: number)=>{

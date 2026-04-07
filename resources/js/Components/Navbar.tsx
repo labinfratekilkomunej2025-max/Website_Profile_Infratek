@@ -99,28 +99,6 @@ export default function Navbar() {
                             )}
                         </Link>
 
-                        {/* ABOUT LINK */}
-                        <Link
-                            href={route('about')}
-                            className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
-                                isActive('/about')
-                                    ? 'text-blue-600'
-                                    : 'text-gray-700 hover:text-blue-600'
-                            }`}
-                        >
-                            <span className="relative z-10">About</span>
-                            {isActive('/about') ? (
-                                <>
-                                    <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
-                                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
-                                </>
-                            ):(
-                                <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
-                            )}
-                        </Link>
-
-
-
                         {/* GALLERY LINK */}
                         <Link
                             href={route('gallery')}
@@ -141,6 +119,26 @@ export default function Navbar() {
                             )}
                         </Link>
 
+                        {/* ABOUT LINK */}
+                        <Link
+                            href={route('about')}
+                            className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
+                                isActive('/about')
+                                    ? 'text-blue-600'
+                                    : 'text-gray-700 hover:text-blue-600'
+                            }`}
+                        >
+                            <span className="relative z-10">About</span>
+                            {isActive('/about') ? (
+                                <>
+                                    <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
+                                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
+                                </>
+                            ):(
+                                <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
+                            )}
+                        </Link>
+
                         {/* CONTACT LINK */}
                         <Link
                             href={route('contact')}
@@ -152,26 +150,6 @@ export default function Navbar() {
                         >
                             <span className="relative z-10">Contact</span>
                             {isActive('/contact') ? (
-                                <>
-                                    <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
-                                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
-                                </>
-                            ):(
-                                <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 transform transition-all duration-300 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></span>
-                            )}
-                        </Link>
-
-                        {/* CONTACT LOGIN */}
-                        <Link
-                            href={route('login')}
-                            className={`relative px-4 py-2 font-semibold transition-all duration-300 group ${
-                                isActive('/contact')
-                                    ? 'text-blue-600'
-                                    : 'text-gray-700 hover:text-blue-600'
-                            }`}
-                        >
-                            <span className="relative z-10">Login</span>
-                            {isActive('/login') ? (
                                 <>
                                     <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/20 to-blue-600/20 scale-100 opacity-100"></span>
                                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50"></span>
@@ -239,17 +217,6 @@ export default function Navbar() {
                             News
                         </Link>
                         <Link
-                            href={route('about')}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                                isActive('/about')
-                                    ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
-                                    : 'text-gray-700 hover:bg-blue-50'
-                            }`}
-                        >
-                            About
-                        </Link>
-                        <Link
                             href={route('gallery')}
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
@@ -261,6 +228,17 @@ export default function Navbar() {
                             Gallery
                         </Link>
                         <Link
+                            href={route('about')}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
+                                isActive('/about')
+                                    ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
+                                    : 'text-gray-700 hover:bg-blue-50'
+                            }`}
+                        >
+                            About
+                        </Link>
+                        <Link
                             href={route('contact')}
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
@@ -270,17 +248,6 @@ export default function Navbar() {
                             }`}
                         >
                             Contact
-                        </Link>
-                        <Link
-                            href={route('login')}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className={`block px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                                isActive('/login')
-                                    ? 'bg-gradient-to-r from-blue-400/20 to-blue-600/20 text-blue-600'
-                                    : 'text-gray-700 hover:bg-blue-50'
-                            }`}
-                        >
-                            Login
                         </Link>
                     </div>
                 )}
