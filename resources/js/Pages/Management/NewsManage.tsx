@@ -471,7 +471,7 @@ export default function NewsDetail({ news_payload }: Props) {
                         </label>
                         <input
                         type="text"
-                        placeholder="CAption text..."
+                        placeholder="Caption text..."
                         value={compForm.text_content}
                         onChange={(e) =>
                             setCompForm({ ...compForm, text_content: e.target.value })
